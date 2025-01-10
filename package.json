@@ -1,0 +1,41 @@
+{
+  "name": "dm-formacion",
+  "type": "module",
+  "version": "0.0.1",
+  "scripts": {
+    "dev": "astro dev",
+    "start": "astro dev",
+    "build": "astro check && astro build",
+    "preview": "astro preview",
+    "astro": "astro"
+  },
+  "dependencies": {
+    "@astrojs/check": "^0.9.4",
+    "@astrojs/node": "^8.3.4",
+    "@astrojs/react": "^3.6.2",
+    "@astrojs/tailwind": "^5.1.2",
+    "@directus/sdk": "^17.0.0",
+    "@types/qs": "^6.9.15",
+    "@types/react": "^18.3.3",
+    "@types/react-dom": "^18.3.0",
+    "astro": "^4.16.8",
+    "astro-seo": "^0.8.4",
+    "date-fns": "^3.6.0",
+    "html-to-text": "^9.0.5",
+    "jsonwebtoken": "^9.0.2",
+    "qs": "^6.13.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "swiper": "^11.1.9",
+    "tailwindcss": "^3.4.8",
+    "typescript": "^5.5.4",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@types/date-fns": "^2.6.0",
+    "@types/html-to-text": "^9.0.4",
+    "@types/jsonwebtoken": "^9.0.6",
+    "prettier": "^3.3.3",
+    "prettier-plugin-astro": "^0.14.1"
+  }
+}

@@ -1,0 +1,284 @@
+---
+import { Image } from 'astro:assets';
+import CourseCard from './course-card.astro';
+import 'swiper/css';
+
+interface CourseProp {
+  id?: string;
+  title: string;
+  image: string;
+  certifier?: string;
+  certifierLogo?: string;
+  start: string;
+  duration: string;
+  price?: number;
+  category: string;
+  partnerPrice?: number;
+  type: string;
+  providerImage?: string;
+  url?: string;
+  showEnrollButton?: boolean;
+}
+
+interface Props {
+  title: string;
+  courses: CourseProp[];
+  id: string;
+  labelGeneralAdmission?: string;
+  labelPartner?: string;
+  enrollButtonText?: string;
+}
+
+const {
+  title,
+  courses,
+  id,
+  labelGeneralAdmission,
+  labelPartner,
+  enrollButtonText,
+} = Astro.props;
+const categories = courses.reduce(
+  (output, course) => {
+    if (!output[course.category]) {
+      output[course.category] = [course];
+    } else {
+      output[course.category].push(course);
+    }
+    return output;
+  },
+  {} as {
+    [key: string]: CourseProp[];
+  }
+);
+---
+
+<style is:global>
+  .swiper {
+    width: 100%;
+    height: 100%;
+
+    @media (min-width: 768px) {
+      overflow: visible;
+    }
+  }
+
+  .swiper-container {
+    @media (min-width: 768px) {
+      gap: 1rem;
+    }
+  }
+
+  .swiper-slide {
+    display: flex !important;
+    justify-content: center;
+    align-items: center;
+    width: 184px !important;
+    height: auto !important;
+
+    @media (min-width: 768px) {
+      width: 25% !important;
+      padding: 0 0.5rem;
+      /* width: 295px !important; */
+
+      &:first-child {
+        padding-left: 0;
+      }
+
+      &:last-child {
+        padding-right: 0;
+      }
+    }
+  }
+
+  .carousel-navigation {
+    position: absolute;
+    top: 1.1rem;
+    right: 1rem;
+
+    & > button:disabled {
+      display: none;
+    }
+
+    @media (min-width: 768px) {
+      display: none;
+    }
+  }
+</style>
+
+<courses-carousel data-id={id}>
+  <div
+    id={id}
+    class="courses-carousel container mx-auto p-4 flex flex-col gap-8 relative"
+  >
+    <div class="flex flex-col gap-4 lg:flex-row lg:justify-between">
+      <h1 class="text-primary text-lg font-bold lg:text-3xl">{title}</h1>
+      <div class="flex flex-wrap gap-4 justify-center">
+        {
+          Object.keys(categories).map(category => (
+            <button
+              type="button"
+              data-category={`${id}-${category.toLowerCase()}`}
+              class="btn-category text-dm-gray-2 border border-dm-gray-2 rounded-md px-4 py-2 text-sm hover:border-primary hover:text-primary"
+            >
+              {category}
+            </button>
+          ))
+        }
+      </div>
+    </div>
+
+    {
+      Object.entries(categories).map(([category, courses]) => (
+        <div
+          class="category-content h-full"
+          data-category={`${id}-${category.toLowerCase()}`}
+          id={`${id}-${category.toLowerCase()}`}
+        >
+          <div class="carousel-navigation">
+            <button class="button-prev" type="button">
+              <Image
+                src="/assets/img/prev.svg"
+                alt="prev"
+                width="30"
+                height="30"
+                loading="eager"
+              />
+            </button>
+            <button class="button-next" type="button">
+              <Image
+                src="/assets/img/next.svg"
+                alt="next"
+                width="30"
+                height="30"
+                loading="eager"
+              />
+            </button>
+          </div>
+          <div class="max-w-[calc(100vw_-_3rem)] sm:w-full overflow-hidden h-full lg:overflow-visible">
+            <div class="swiper">
+              <div class="swiper-wrapper">
+                {courses
+                  .slice(0, 4)
+                  .map(
+                    ({
+                      id,
+                      title,
+                      image,
+                      certifier,
+                      certifierLogo,
+                      start,
+                      duration,
+                      price,
+                      partnerPrice,
+                      type,
+                      providerImage,
+                      url,
+                      showEnrollButton,
+                    }) => (
+                      <div class="swiper-slide">
+                        <CourseCard
+                          id={id}
+                          title={title}
+                          image={image}
+                          certifier={certifier}
+                          certifierLogo={certifierLogo}
+                          start={start}
+                          duration={duration}
+                          price={price}
+                          partnerPrice={partnerPrice}
+                          type={type}
+                          category={category}
+                          providerImage={providerImage}
+                          url={url}
+                          labelGeneralAdmission={labelGeneralAdmission}
+                          labelPartner={labelPartner}
+                          showEnrollButton={showEnrollButton}
+                          enrollButtonText={enrollButtonText}
+                        />
+                      </div>
+                    )
+                  )}
+              </div>
+            </div>
+          </div>
+        </div>
+      ))
+    }
+  </div>
+</courses-carousel>
+
+<script type="module" is:inline>
+  import Swiper from 'https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.mjs';
+
+  class CoursesCarousel extends HTMLElement {
+    constructor() {
+      super();
+
+      this.id = this.dataset.id;
+      this.container = document.getElementById(this.id);
+      this.buttons = this.container.querySelectorAll('.btn-category');
+      this.contents = this.container.querySelectorAll('.category-content');
+
+      const activeClasses = ['border-primary', 'text-primary'];
+      const normalClasses = ['border-dm-gray-2', 'text-dm-gray-2'];
+
+      this.hideAll();
+      this.show(this.buttons[0].dataset.category);
+      this.buttons[0].classList.remove(...normalClasses);
+      this.buttons[0].classList.add(...activeClasses);
+
+      this.buttons.forEach(button => {
+        button.addEventListener('click', e => {
+          const category = e.target.dataset.category;
+          this.hideAll();
+          this.show(category);
+
+          this.buttons.forEach(button => {
+            button.classList.remove(...activeClasses);
+            button.classList.add(...normalClasses);
+          });
+
+          e.target.classList.remove(...normalClasses);
+          e.target.classList.add(...activeClasses);
+        });
+      });
+
+      this.contents.forEach(content => {
+        new Swiper(`#${content.dataset.category} .swiper`, {
+          speed: 500,
+          navigation: {
+            nextEl: `#${content.dataset.category} .button-next`,
+            prevEl: `#${content.dataset.category} .button-prev`,
+          },
+          centeredSlides: false,
+          slidesPerView: 'auto',
+          spaceBetween: 15,
+          draggable: false,
+          breakpoints: {
+            768: {
+              slidesPerView: 4,
+              centeredSlides: false,
+              enabled: false,
+              spaceBetween: 0,
+            },
+          },
+        });
+      });
+    }
+
+    show(category) {
+      this.container
+        .querySelector(`.category-content[data-category=${category}]`)
+        .classList.remove('hidden');
+    }
+
+    hideAll() {
+      this.contents.forEach(content => {
+        content.classList.add('hidden');
+      });
+    }
+  }
+
+  customElements.get('courses-carousel') ||
+    customElements.define('courses-carousel', CoursesCarousel);
+</script>

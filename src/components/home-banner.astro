@@ -1,0 +1,44 @@
+---
+import { directusFileURL, type HomeBanner } from '@/utils/directus';
+import { Image } from 'astro:assets';
+
+const { title, image, imageMobile, body, buttonText, buttonUrl } =
+  Astro.props as HomeBanner;
+---
+
+<div class="w-full overflow-hidden max-w-screen-2xl lg:mx-auto relative">
+  <Image
+    class="object-cover object-center w-full h-full md:hidden"
+    src={directusFileURL(imageMobile)}
+    alt="Banner"
+    width={1440}
+    height={540}
+  />
+  <Image
+    class="hidden object-cover object-center w-full h-full md:block"
+    src={directusFileURL(image)}
+    alt="Banner"
+    width={1440}
+    height={540}
+  />
+  <div
+    class="absolute text-white top-14 left-10 sm:top-20 md:left-12 md:top-10 lg:left-44 lg:max-w-md xl:top-16"
+  >
+    <h2
+      class="text-lg sm:text-2xl md:text-3xl lg:text-4xl mb-8 lg:mb-0"
+      set:html={title}
+    />
+
+    <div class="my-8 hidden lg:block" set:html={body} />
+
+    {
+      buttonText && buttonUrl && (
+        <a
+          href={buttonUrl}
+          class="text-white font-bold border border-white px-4 py-2 rounded-lg text-xs md:text-lg"
+          set:html={buttonText}
+        />
+      )
+    }
+  </div>
+</div>

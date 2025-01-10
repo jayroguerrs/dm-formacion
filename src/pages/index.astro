@@ -1,0 +1,391 @@
+---
+import Alliances from '@/components/alliances.astro';
+import HomeBanner from '@/components/home-banner.astro';
+import WhatIsDm from '@/components/what-is-dm.astro';
+import WhyDm from '@/components/why-dm.astro';
+import Layout from '@/layouts/root.layout.astro';
+import HowItWorks from '@/components/how-it-works.astro';
+import Testimonies from '@/components/testimonies.astro';
+import Partners from '@/components/partners.astro';
+import CoursesCarousel from '@/components/courses-carousel.astro';
+import EventsCarousel from '@/components/events-carousel.astro';
+import {
+  directus,
+  directusFileURL,
+  type Certifier,
+  type Provider,
+} from '@/utils/directus';
+import { readItems, readSingleton, readField } from '@directus/sdk';
+import { format } from 'date-fns';
+import SEO from '@/components/seo.astro';
+
+const homeBannerRequest = directus.request(readSingleton('homeBanner'));
+const whatIsDmRequest = directus.request(readSingleton('whatIsDM'));
+const whyWithDmRequest = directus.request(
+  readSingleton('whyWithDM', {
+    fields: ['title', 'image', { reasons: ['body'] }],
+  })
+);
+const alliancesRequest = directus.request(
+  readItems('alliance', { filter: { status: { _eq: 'published' } } })
+);
+const howItWorksRequest = await directus.request(readSingleton('howItWorks'));
+const reviewsRequest = directus.request(
+  readItems('review', { limit: 5, filter: { featured: { _eq: true } } })
+);
+const benefitsBannerRequest = directus.request(readSingleton('benefitsBanner'));
+const testimonyRequest = directus.request(readSingleton('testimony'));
+const internalCategoriesRequest = directus.request(
+  readField('internalCourse', 'type')
+);
+const externalCategoriesRequest = directus.request(
+  readField('externalCourse', 'type')
+);
+const homeConfigRequest = directus.request(readSingleton('homeConfig'));
+
+const eventsRequest = directus.request(
+  readItems('event', {
+    limit: 3,
+    sort: 'start',
+    fields: ['id', 'title', 'modality', 'image', 'start', 'end'],
+    filter: {
+      _and: [
+        { status: { _eq: 'published' } },
+        { start: { _gte: format(new Date(), 'dd-MM-yy') } },
+      ],
+    },
+  })
+);
+
+const coursesConfigRequest = await directus.request(
+  readSingleton('coursesConfig', { fields: ['*'] })
+);
+
+const [
+  homeBanner,
+  whatIsDm,
+  whyWithDm,
+  alliances,
+  howItWorks,
+  reviews,
+  benefits,
+  internalCategoriesField,
+  externalCategoriesField,
+  events,
+  testimonyConfig,
+  homeConfig,
+  coursesConfig,
+] = await Promise.all([
+  homeBannerRequest,
+  whatIsDmRequest,
+  whyWithDmRequest,
+  alliancesRequest,
+  howItWorksRequest,
+  reviewsRequest,
+  benefitsBannerRequest,
+  internalCategoriesRequest,
+  externalCategoriesRequest,
+  eventsRequest,
+  testimonyRequest,
+  homeConfigRequest,
+  coursesConfigRequest,
+]);
+
+const internalCategories = (internalCategoriesField.meta.options?.choices ||
+  []) as {
+  value: string;
+  text: string;
+}[];
+
+const externalCategories = (externalCategoriesField.meta.options?.choices ||
+  []) as {
+  value: string;
+  text: string;
+}[];
+
+const internalCourses = await Promise.all(
+  internalCategories.map(({ value }) =>
+    directus.request(
+      readItems('internalCourse', {
+        limit: 4,
+        sort: 'start',
+        fields: [
+          'id',
+          'title',
+          'type',
+          'image',
+          'start',
+          'duration',
+          'price',
+          'partnerPrice',
+          'generalAdmission',
+          'partner',
+          'showEnrollButton',
+          { certifier: ['*'] },
+        ],
+        filter: {
+          _and: [
+            {
+              status: {
+                _eq: 'published',
+              },
+            },
+            {
+              start: {
+                _gte: format(new Date(), 'dd-MM-yy'),
+              },
+            },
+            {
+              type: {
+                _eq: value,
+              },
+            },
+          ],
+        },
+      })
+    )
+  )
+).then(results => results.flat());
+
+const externalCourses = await Promise.all(
+  externalCategories.map(({ value }) =>
+    directus.request(
+      readItems('externalCourse', {
+        limit: 4,
+        sort: 'start',
+        fields: [
+          'id',
+          'title',
+          'type',
+          'image',
+          'start',
+          'duration',
+          'price',
+          'partnerPrice',
+          'provider',
+          'url',
+          'generalAdmission',
+          'partner',
+          { provider: ['*'] },
+        ],
+        filter: {
+          _and: [
+            {
+              status: {
+                _eq: 'published',
+              },
+            },
+            {
+              start: {
+                _gte: format(new Date(), 'dd-MM-yy'),
+              },
+            },
+            {
+              type: {
+                _eq: value,
+              },
+            },
+          ],
+        },
+      })
+    )
+  )
+).then(results => results.flat());
+
+const courses = internalCourses.map(course => ({
+  id: course.id,
+  title: course.title,
+  type: 'internal',
+  image: course.image,
+  certifier: (course.certifier as Certifier).name,
+  certifierLogo: (course.certifier as Certifier).logo,
+  start: course.start,
+  duration: course.duration,
+  price: course.generalAdmission ? course.price : undefined,
+  partnerPrice: course.partner ? course.partnerPrice : undefined,
+  category: course.type,
+  showEnrollButton: course.showEnrollButton,
+}));
+
+const externalCoursesCarousel = externalCourses.map(course => ({
+  id: course.id,
+  title: course.title,
+  type: 'external',
+  image: course.image,
+  start: course.start,
+  duration: course.duration,
+  price: course.generalAdmission ? course.price : undefined,
+  partnerPrice: course.partner ? course.partnerPrice : undefined,
+  category: course.type,
+  providerImage: directusFileURL((course.provider as Provider).logo),
+  url: course.url,
+}));
+
+const eventsCarousel = events.map(event => ({
+  id: event.id,
+  title: event.title,
+  type: event.modality,
+  image: event.image,
+  start: event.start,
+  end: event.end,
+}));
+---
+
+<SEO />
+
+<style>
+  .external-programs {
+    background-image: url('/assets/img/bg-externals.svg');
+    background-repeat: no-repeat;
+    background-size: cover;
+  }
+
+  .bg-events {
+    background-image: url('/assets/img/bg-green.svg');
+    background-repeat: no-repeat;
+    background-size: cover;
+  }
+</style>
+
+<Layout>
+  {
+    homeConfig.showMainBanner && (
+      <div class="pb-12">
+        <HomeBanner {...homeBanner} />
+      </div>
+    )
+  }
+
+  {
+    courses.length > 0 && homeConfig.showInternalCourses && (
+      <CoursesCarousel
+        id="internals"
+        title="Cursos próximos a iniciar"
+        courses={courses}
+        labelGeneralAdmission={coursesConfig.labelGeneralAdmission}
+        labelPartner={coursesConfig.labelPartner}
+        enrollButtonText={coursesConfig.enrollButtonTextCard}
+      />
+    )
+  }
+  {
+    externalCoursesCarousel.length > 0 && homeConfig.showExternalCourses && (
+      <div class="external-programs py-11">
+        <CoursesCarousel
+          id="externals"
+          title="Programas externos con beneficios"
+          courses={externalCoursesCarousel}
+          labelGeneralAdmission={coursesConfig.labelGeneralAdmission}
+          labelPartner={coursesConfig.labelPartner}
+        />
+      </div>
+    )
+  }
+  {
+    events.length > 0 && homeConfig.showEvents && (
+      <div class="relative py-12">
+        <EventsCarousel id="events" title="Eventos" events={eventsCarousel} />
+        <div class="bg-events top-[40%] left-0 absolute w-full h-[60%]" />
+      </div>
+    )
+  }
+
+  {
+    !!whatIsDm && homeConfig.showWhatIsDM && (
+      <div class="py-12">
+        <WhatIsDm
+          title={whatIsDm.title}
+          body={whatIsDm.body}
+          buttonText={whatIsDm.buttonText}
+          buttonUrl={whatIsDm.buttonUrl}
+          stats={[
+            {
+              icon: whatIsDm.stat1Icon,
+              label: whatIsDm.stat1Label,
+              value: whatIsDm.stat1Value,
+            },
+            {
+              icon: whatIsDm.stat2Icon,
+              label: whatIsDm.stat2Label,
+              value: whatIsDm.stat2Value,
+            },
+            {
+              icon: whatIsDm.stat3Icon,
+              label: whatIsDm.stat3Label,
+              value: whatIsDm.stat3Value,
+            },
+          ]}
+        />
+      </div>
+    )
+  }
+  {
+    !!whyWithDm && homeConfig.showWhyDM && (
+      <WhyDm
+        title={whyWithDm.title}
+        image={whyWithDm.image}
+        reasons={whyWithDm.reasons || []}
+      />
+    )
+  }
+
+  {
+    !!alliances && homeConfig.showAlliances && (
+      <div class="py-12">
+        <Alliances
+          alliances={alliances.map(alliance => ({
+            name: alliance.name,
+            logo: directusFileURL(alliance.logo),
+          }))}
+        />
+      </div>
+    )
+  }
+
+  {
+    !!howItWorks && homeConfig.showHowItWorks && (
+      <HowItWorks
+        title={howItWorks.title}
+        steps={[
+          {
+            image: directusFileURL(howItWorks.section1Image),
+            title: howItWorks.section1Title,
+            description: howItWorks.section1Body,
+          },
+          {
+            image: directusFileURL(howItWorks.section2Image),
+            title: howItWorks.section2Title,
+            description: howItWorks.section2Body,
+          },
+          {
+            image: directusFileURL(howItWorks.section3Image),
+            title: howItWorks.section3Title,
+            description: howItWorks.section3Body,
+          },
+        ]}
+      />
+    )
+  }
+  {
+    !!reviews && homeConfig.showReviews && (
+      <Testimonies
+        config={testimonyConfig}
+        testimonies={reviews.map(review => ({
+          body: review.body,
+          author: review.studentName,
+          image: directusFileURL(review.studentImage),
+          detail: review.studentDetail,
+        }))}
+      />
+    )
+  }
+  {
+    !!benefits && homeConfig.showBenefits && (
+      <Partners
+        title={benefits.title}
+        body={benefits.body}
+        image={benefits.image}
+      />
+    )
+  }
+</Layout>

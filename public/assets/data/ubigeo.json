@@ -1,0 +1,379 @@
+{
+  "departamentos": [
+    { "id": "amazonas", "name": "Amazonas" },
+    { "id": "ancash", "name": "\u00c1ncash" },
+    { "id": "apurimac", "name": "Apur\u00edmac" },
+    { "id": "arequipa", "name": "Arequipa" },
+    { "id": "ayacucho", "name": "Ayacucho" },
+    { "id": "cajamarca", "name": "Cajamarca" },
+    { "id": "callao", "name": "Callao" },
+    { "id": "cusco", "name": "Cusco" },
+    { "id": "huancavelica", "name": "Huancavelica" },
+    { "id": "huanuco", "name": "Hu\u00e1nuco" },
+    { "id": "ica", "name": "Ica" },
+    { "id": "junin", "name": "Jun\u00edn" },
+    { "id": "la libertad", "name": "La Libertad" },
+    { "id": "lambayeque", "name": "Lambayeque" },
+    { "id": "lima", "name": "Lima" },
+    { "id": "loreto", "name": "Loreto" },
+    { "id": "madre de dios", "name": "Madre de Dios" },
+    { "id": "moquegua", "name": "Moquegua" },
+    { "id": "pasco", "name": "Pasco" },
+    { "id": "piura", "name": "Piura" },
+    { "id": "puno", "name": "Puno" },
+    { "id": "san martin", "name": "San Mart\u00edn" },
+    { "id": "tacna", "name": "Tacna" },
+    { "id": "tumbes", "name": "Tumbes" },
+    { "id": "ucayali", "name": "Ucayali" }
+  ],
+  "provincias": [
+    { "id": "chachapoyas", "name": "Chachapoyas", "department_id": "amazonas" },
+    { "id": "bagua", "name": "Bagua", "department_id": "amazonas" },
+    { "id": "bongara", "name": "Bongar\u00e1", "department_id": "amazonas" },
+    {
+      "id": "condorcanqui",
+      "name": "Condorcanqui",
+      "department_id": "amazonas"
+    },
+    { "id": "luya", "name": "Luya", "department_id": "amazonas" },
+    {
+      "id": "rodriguez de mendoza",
+      "name": "Rodr\u00edguez de Mendoza",
+      "department_id": "amazonas"
+    },
+    { "id": "utcubamba", "name": "Utcubamba", "department_id": "amazonas" },
+    { "id": "Huaraz", "name": "Huaraz", "department_id": "ancash" },
+    { "id": "aija", "name": "Aija", "department_id": "ancash" },
+    {
+      "id": "antonio raymondi",
+      "name": "Antonio Raymondi",
+      "department_id": "ancash"
+    },
+    { "id": "asuncion", "name": "Asunci\u00f3n", "department_id": "ancash" },
+    { "id": "bolognesi", "name": "Bolognesi", "department_id": "ancash" },
+    { "id": "carhuaz", "name": "Carhuaz", "department_id": "ancash" },
+    {
+      "id": "carlos fermin Fitzcarrald",
+      "name": "Carlos Ferm\u00edn Fitzcarrald",
+      "department_id": "ancash"
+    },
+    { "id": "casma", "name": "Casma", "department_id": "ancash" },
+    { "id": "corongo", "name": "Corongo", "department_id": "ancash" },
+    { "id": "huari", "name": "Huari", "department_id": "ancash" },
+    { "id": "huarmey", "name": "Huarmey", "department_id": "ancash" },
+    { "id": "huaylas", "name": "Huaylas", "department_id": "ancash" },
+    {
+      "id": "mariscal luzuriaga",
+      "name": "Mariscal Luzuriaga",
+      "department_id": "ancash"
+    },
+    { "id": "ocros", "name": "Ocros", "department_id": "ancash" },
+    { "id": "pallasca", "name": "Pallasca", "department_id": "ancash" },
+    { "id": "pomabamba", "name": "Pomabamba", "department_id": "ancash" },
+    { "id": "eecuay", "name": "Recuay", "department_id": "ancash" },
+    { "id": "santa", "name": "Santa", "department_id": "ancash" },
+    { "id": "sihuas", "name": "Sihuas", "department_id": "ancash" },
+    { "id": "yungay", "name": "Yungay", "department_id": "ancash" },
+    { "id": "abancay", "name": "Abancay", "department_id": "apurimac" },
+    { "id": "andahuaylas", "name": "Andahuaylas", "department_id": "apurimac" },
+    { "id": "antabamba", "name": "Antabamba", "department_id": "apurimac" },
+    { "id": "aymaraes", "name": "Aymaraes", "department_id": "apurimac" },
+    { "id": "cotabambas", "name": "Cotabambas", "department_id": "apurimac" },
+    { "id": "chincheros", "name": "Chincheros", "department_id": "apurimac" },
+    { "id": "grau", "name": "Grau", "department_id": "apurimac" },
+    { "id": "arequipa", "name": "Arequipa", "department_id": "arequipa" },
+    { "id": "camana", "name": "Caman\u00e1", "department_id": "arequipa" },
+    { "id": "caraveli", "name": "Caravel\u00ed", "department_id": "arequipa" },
+    { "id": "castilla", "name": "Castilla", "department_id": "arequipa" },
+    { "id": "caylloma", "name": "Caylloma", "department_id": "arequipa" },
+    { "id": "condesuyos", "name": "Condesuyos", "department_id": "arequipa" },
+    { "id": "islay", "name": "Islay", "department_id": "arequipa" },
+    { "id": "la union", "name": "La Uni\u00f2n", "department_id": "arequipa" },
+    { "id": "huamanga", "name": "Huamanga", "department_id": "ayacucho" },
+    { "id": "cangallo", "name": "Cangallo", "department_id": "ayacucho" },
+    {
+      "id": "huanca sancos",
+      "name": "Huanca Sancos",
+      "department_id": "ayacucho"
+    },
+    { "id": "huanta", "name": "Huanta", "department_id": "ayacucho" },
+    { "id": "la mar", "name": "La Mar", "department_id": "ayacucho" },
+    { "id": "lucanas", "name": "Lucanas", "department_id": "ayacucho" },
+    {
+      "id": "parinacochas",
+      "name": "Parinacochas",
+      "department_id": "ayacucho"
+    },
+    {
+      "id": "paucar del sara sara",
+      "name": "P\u00e0ucar del Sara Sara",
+      "department_id": "ayacucho"
+    },
+    { "id": "sucre", "name": "Sucre", "department_id": "ayacucho" },
+    {
+      "id": "victor fajardo",
+      "name": "V\u00edctor Fajardo",
+      "department_id": "ayacucho"
+    },
+    {
+      "id": "vilcas huaman",
+      "name": "Vilcas Huam\u00e1n",
+      "department_id": "ayacucho"
+    },
+    { "id": "cajamarca", "name": "Cajamarca", "department_id": "cajamarca" },
+    { "id": "cajabamba", "name": "Cajabamba", "department_id": "cajamarca" },
+    { "id": "celendin", "name": "Celend\u00edn", "department_id": "cajamarca" },
+    { "id": "chota", "name": "Chota", "department_id": "cajamarca" },
+    {
+      "id": "contumaza",
+      "name": "Contumaz\u00e1",
+      "department_id": "cajamarca"
+    },
+    { "id": "cutervo", "name": "Cutervo", "department_id": "cajamarca" },
+    { "id": "hualgayoc", "name": "Hualgayoc", "department_id": "cajamarca" },
+    { "id": "jaen", "name": "Ja\u00e9n", "department_id": "cajamarca" },
+    {
+      "id": "san ignacio",
+      "name": "San Ignacio",
+      "department_id": "cajamarca"
+    },
+    { "id": "san marcos", "name": "San Marcos", "department_id": "cajamarca" },
+    { "id": "san miguel", "name": "San Miguel", "department_id": "cajamarca" },
+    { "id": "san pablo", "name": "San Pablo", "department_id": "cajamarca" },
+    { "id": "santa cruz", "name": "Santa Cruz", "department_id": "cajamarca" },
+    {
+      "id": "prov const del callao",
+      "name": "Prov. Const. del Callao",
+      "department_id": "callao"
+    },
+    { "id": "cusco", "name": "Cusco", "department_id": "cusco" },
+    { "id": "acomayo", "name": "Acomayo", "department_id": "cusco" },
+    { "id": "anta", "name": "Anta", "department_id": "cusco" },
+    { "id": "calca", "name": "Calca", "department_id": "cusco" },
+    { "id": "canas", "name": "Canas", "department_id": "cusco" },
+    { "id": "canchis", "name": "Canchis", "department_id": "cusco" },
+    { "id": "chumbivilcas", "name": "Chumbivilcas", "department_id": "cusco" },
+    { "id": "espinar", "name": "Espinar", "department_id": "cusco" },
+    {
+      "id": "la convencion",
+      "name": "La Convenci\u00f3n",
+      "department_id": "cusco"
+    },
+    { "id": "paruro", "name": "Paruro", "department_id": "cusco" },
+    { "id": "paucartambo", "name": "Paucartambo", "department_id": "cusco" },
+    { "id": "quispicanchi", "name": "Quispicanchi", "department_id": "cusco" },
+    { "id": "urubamba", "name": "Urubamba", "department_id": "cusco" },
+    {
+      "id": "huancavelica",
+      "name": "Huancavelica",
+      "department_id": "huancavelica"
+    },
+    { "id": "acobamba", "name": "Acobamba", "department_id": "huancavelica" },
+    { "id": "angaraes", "name": "Angaraes", "department_id": "huancavelica" },
+    {
+      "id": "castrovirreyna",
+      "name": "Castrovirreyna",
+      "department_id": "huancavelica"
+    },
+    { "id": "churcampa", "name": "Churcampa", "department_id": "huancavelica" },
+    {
+      "id": "huaytara",
+      "name": "Huaytar\u00e1",
+      "department_id": "huancavelica"
+    },
+    { "id": "tayacaja", "name": "Tayacaja", "department_id": "huancavelica" },
+    { "id": "huanuco", "name": "Hu\u00e1nuco", "department_id": "huanuco" },
+    { "id": "ambo", "name": "Ambo", "department_id": "huanuco" },
+    { "id": "dos de mayo", "name": "Dos de Mayo", "department_id": "huanuco" },
+    { "id": "huacaybamba", "name": "Huacaybamba", "department_id": "huanuco" },
+    {
+      "id": "huamalides",
+      "name": "Huamal\u00edes",
+      "department_id": "huanuco"
+    },
+    {
+      "id": "leoncio prado",
+      "name": "Leoncio Prado",
+      "department_id": "huanuco"
+    },
+    {
+      "id": "maranon",
+      "name": "Mara\u00f1\u00f3n",
+      "department_id": "huanuco"
+    },
+    { "id": "pachitea", "name": "Pachitea", "department_id": "huanuco" },
+    { "id": "puerto inca", "name": "Puerto Inca", "department_id": "huanuco" },
+    { "id": "lauricocha", "name": "Lauricocha", "department_id": "huanuco" },
+    { "id": "yarowilca", "name": "Yarowilca", "department_id": "huanuco" },
+    { "id": "ica", "name": "Ica", "department_id": "ica" },
+    { "id": "chincha", "name": "Chincha", "department_id": "ica" },
+    { "id": "nasca", "name": "Nasca", "department_id": "ica" },
+    { "id": "palpa", "name": "Palpa", "department_id": "ica" },
+    { "id": "pisco", "name": "Pisco", "department_id": "ica" },
+    { "id": "huancayo", "name": "Huancayo", "department_id": "junin" },
+    { "id": "concepcion", "name": "Concepci\u00f3n", "department_id": "junin" },
+    { "id": "chanchamayo", "name": "Chanchamayo", "department_id": "junin" },
+    { "id": "jauja", "name": "Jauja", "department_id": "junin" },
+    { "id": "junin", "name": "Jun\u00edn", "department_id": "junin" },
+    { "id": "satipo", "name": "Satipo", "department_id": "junin" },
+    { "id": "tarma", "name": "Tarma", "department_id": "junin" },
+    { "id": "yauli", "name": "Yauli", "department_id": "junin" },
+    { "id": "chupaca", "name": "Chupaca", "department_id": "junin" },
+    { "id": "trujillo", "name": "Trujillo", "department_id": "la libertad" },
+    { "id": "ascope", "name": "Ascope", "department_id": "la libertad" },
+    { "id": "bolivar", "name": "Bol\u00edvar", "department_id": "la libertad" },
+    { "id": "chepen", "name": "Chep\u00e9n", "department_id": "la libertad" },
+    { "id": "julcan", "name": "Julc\u00e1n", "department_id": "la libertad" },
+    { "id": "otuzco", "name": "Otuzco", "department_id": "la libertad" },
+    { "id": "pacasmayo", "name": "Pacasmayo", "department_id": "la libertad" },
+    { "id": "pataz", "name": "Pataz", "department_id": "la libertad" },
+    {
+      "id": "sanchez carrion",
+      "name": "S\u00e1nchez Carri\u00f3n",
+      "department_id": "la libertad"
+    },
+    {
+      "id": "santiago de chuco",
+      "name": "Santiago de Chuco",
+      "department_id": "la libertad"
+    },
+    {
+      "id": "gran chimu",
+      "name": "Gran Chim\u00fa",
+      "department_id": "la libertad"
+    },
+    { "id": "viru", "name": "Vir\u00fa", "department_id": "la libertad" },
+    { "id": "chiclayo", "name": "Chiclayo", "department_id": "lambayeque" },
+    {
+      "id": "ferrenafe",
+      "name": "Ferre\u00f1afe",
+      "department_id": "lambayeque"
+    },
+    { "id": "lambayeque", "name": "Lambayeque", "department_id": "lambayeque" },
+    { "id": "lima", "name": "Lima", "department_id": "lima" },
+    { "id": "barranca", "name": "Barranca", "department_id": "lima" },
+    { "id": "cajatambo", "name": "Cajatambo", "department_id": "lima" },
+    { "id": "canta", "name": "Canta", "department_id": "lima" },
+    { "id": "canete", "name": "Ca\u00f1ete", "department_id": "lima" },
+    { "id": "huaral", "name": "Huaral", "department_id": "lima" },
+    { "id": "huarochiri", "name": "Huarochir\u00ed", "department_id": "lima" },
+    { "id": "huaura", "name": "Huaura", "department_id": "lima" },
+    { "id": "oyon", "name": "Oy\u00f3n", "department_id": "lima" },
+    { "id": "yauyos", "name": "Yauyos", "department_id": "lima" },
+    { "id": "maynas", "name": "Maynas", "department_id": "loreto" },
+    {
+      "id": "alto amazonas",
+      "name": "Alto Amazonas",
+      "department_id": "loreto"
+    },
+    { "id": "loreto", "name": "Loreto", "department_id": "loreto" },
+    {
+      "id": "mariscal ramon castilla",
+      "name": "Mariscal Ram\u00f3n Castilla",
+      "department_id": "loreto"
+    },
+    { "id": "requena", "name": "Requena", "department_id": "loreto" },
+    { "id": "ucayali", "name": "Ucayali", "department_id": "loreto" },
+    {
+      "id": "datem del Maranon",
+      "name": "Datem del Mara\u00f1\u00f3n",
+      "department_id": "loreto"
+    },
+    { "id": "putumayo", "name": "Putumayo", "department_id": "loreto" },
+    {
+      "id": "tambopata",
+      "name": "Tambopata",
+      "department_id": "madre de dios"
+    },
+    { "id": "manu", "name": "Manu", "department_id": "madre de dios" },
+    {
+      "id": "tahuamanu",
+      "name": "Tahuamanu",
+      "department_id": "madre de dios"
+    },
+    {
+      "id": "mariscal nieto",
+      "name": "Mariscal Nieto",
+      "department_id": "moquegua"
+    },
+    {
+      "id": "general sanchez cerro",
+      "name": "General S\u00e1nchez Cerro",
+      "department_id": "moquegua"
+    },
+    { "id": "ilo", "name": "Ilo", "department_id": "moquegua" },
+    { "id": "pasco", "name": "Pasco", "department_id": "pasco" },
+    {
+      "id": "daniel alcides carrion",
+      "name": "Daniel Alcides Carri\u00f3n",
+      "department_id": "pasco"
+    },
+    { "id": "oxapampa", "name": "Oxapampa", "department_id": "pasco" },
+    { "id": "piura", "name": "Piura", "department_id": "piura" },
+    { "id": "ayabaca", "name": "Ayabaca", "department_id": "piura" },
+    { "id": "huancabamba", "name": "Huancabamba", "department_id": "piura" },
+    { "id": "morropon", "name": "Morrop\u00f3n", "department_id": "piura" },
+    { "id": "paita", "name": "Paita", "department_id": "piura" },
+    { "id": "sullana", "name": "Sullana", "department_id": "piura" },
+    { "id": "talara", "name": "Talara", "department_id": "piura" },
+    { "id": "sechura", "name": "Sechura", "department_id": "piura" },
+    { "id": "puno", "name": "Puno", "department_id": "puno" },
+    { "id": "azangaro", "name": "Az\u00e1ngaro", "department_id": "puno" },
+    { "id": "carabaya", "name": "Carabaya", "department_id": "puno" },
+    { "id": "chucuito", "name": "Chucuito", "department_id": "puno" },
+    { "id": "el collao", "name": "El Collao", "department_id": "puno" },
+    { "id": "huancane", "name": "Huancan\u00e9", "department_id": "puno" },
+    { "id": "lampa", "name": "Lampa", "department_id": "puno" },
+    { "id": "melgar", "name": "Melgar", "department_id": "puno" },
+    { "id": "moho", "name": "Moho", "department_id": "puno" },
+    {
+      "id": "san antonio de putina",
+      "name": "San Antonio de Putina",
+      "department_id": "puno"
+    },
+    { "id": "san roman", "name": "San Rom\u00e1n", "department_id": "puno" },
+    { "id": "sandia", "name": "Sandia", "department_id": "puno" },
+    { "id": "yunguyo", "name": "Yunguyo", "department_id": "puno" },
+    { "id": "moyobamba", "name": "Moyobamba", "department_id": "san martin" },
+    { "id": "bellavista", "name": "Bellavista", "department_id": "san martin" },
+    { "id": "el dorado", "name": "El Dorado", "department_id": "san martin" },
+    { "id": "huallaga", "name": "Huallaga", "department_id": "san martin" },
+    { "id": "lamas", "name": "Lamas", "department_id": "san martin" },
+    {
+      "id": "mariscal caceres",
+      "name": "Mariscal C\u00e1ceres",
+      "department_id": "san martin"
+    },
+    { "id": "picota", "name": "Picota", "department_id": "san martin" },
+    { "id": "rioja", "name": "Rioja", "department_id": "san martin" },
+    {
+      "id": "san martin",
+      "name": "San Mart\u00edn",
+      "department_id": "san martin"
+    },
+    { "id": "tocache", "name": "Tocache", "department_id": "san martin" },
+    { "id": "tacna", "name": "Tacna", "department_id": "tacna" },
+    { "id": "candarave", "name": "Candarave", "department_id": "tacna" },
+    {
+      "id": "jorge basadre",
+      "name": "Jorge Basadre",
+      "department_id": "tacna"
+    },
+    { "id": "tarata", "name": "Tarata", "department_id": "tacna" },
+    { "id": "tumbes", "name": "Tumbes", "department_id": "tumbes" },
+    {
+      "id": "contralmirante villar",
+      "name": "Contralmirante Villar",
+      "department_id": "tumbes"
+    },
+    { "id": "zarumilla", "name": "Zarumilla", "department_id": "tumbes" },
+    {
+      "id": "coronel portillo",
+      "name": "Coronel Portillo",
+      "department_id": "ucayali"
+    },
+    { "id": "atalaya", "name": "Atalaya", "department_id": "ucayali" },
+    { "id": "padre abad", "name": "Padre Abad", "department_id": "ucayali" },
+    { "id": "purus", "name": "Pur\u00fas", "department_id": "ucayali" }
+  ]
+}

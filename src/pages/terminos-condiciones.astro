@@ -1,0 +1,59 @@
+---
+import Breadcrumb from '@/components/breadcrumb.astro';
+import Layout from '@/layouts/root.layout.astro';
+import { WYSIWYG_CLASSES } from '@/utils/constants';
+import { directusFileURL } from '@/utils/directus';
+import { directus } from '@/utils/directus';
+import { readSingleton } from '@directus/sdk';
+import { Image } from 'astro:assets';
+import SEO from '@/components/seo.astro';
+
+const terms = await directus.request(
+  readSingleton('termsConditions', { fields: ['*'] })
+);
+---
+
+<SEO title="Términos y Condiciones" />
+<Layout>
+  <Breadcrumb
+    items={[
+      { text: 'Home', url: '/', icon: '/assets/home.icon.svg' },
+      { text: 'Términos y Condiciones' },
+    ]}
+  />
+  <div class="flex flex-col gap-4 pb-4">
+    <div class="relative w-full">
+      <Image
+        src={directusFileURL(terms.image)}
+        alt="Términos y Condiciones'"
+        width={700}
+        height={400}
+        loading="eager"
+        class="object-cover w-full h-full absolute top-0 left-0 -z-[1]"
+      />
+      <div
+        class="bg-secondary/[0.9] w-full h-full absolute top-0 left-0 -z-[1]"
+      >
+      </div>
+      <div class="px-4 py-8 flex flex-col gap-4 container mx-auto">
+        <a href="/" class="flex gap-4 items-center text-white text-sm">
+          <Image
+            src="/assets/chevron-left.icon.svg"
+            alt="back"
+            width="9"
+            height="17"
+            loading="eager"
+          />
+          <span>Ir atrás</span>
+        </a>
+        <h1 class="text-white text-3xl px-4 lg:text-4xl">
+          <strong>Términos y Condiciones</strong>
+        </h1>
+      </div>
+    </div>
+
+    <div class="container px-4 py-8 mx-auto flex flex-col gap-4">
+      <div class:list={[WYSIWYG_CLASSES]} set:html={terms.body} />
+    </div>
+  </div>
+</Layout>

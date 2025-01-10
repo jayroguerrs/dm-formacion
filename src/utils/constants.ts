@@ -1,0 +1,1 @@
+export const WYSIWYG_CLASSES = " [&_p]:pb-2 [&_ul]:list-disc [&_ul]:pl-4 [&_ol]:list-decimal [&_ol]:pl-4";

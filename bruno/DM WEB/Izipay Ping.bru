@@ -1,0 +1,22 @@
+meta {
+  name: Izipay Ping
+  type: http
+  seq: 3
+}
+
+post {
+  url: https://test.dm.edu.pe/api/registro-pago
+  body: json
+  auth: none
+}
+
+headers {
+  transactionId: 123123
+  ~Content-Type: application/json; charset=utf-8
+}
+
+body:json {
+  {
+    "code": "TEST"
+  }
+}

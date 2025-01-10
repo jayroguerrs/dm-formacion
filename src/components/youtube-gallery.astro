@@ -1,0 +1,168 @@
+---
+import { Image } from 'astro:assets';
+interface Props {
+  id?: string;
+  videos: string[];
+}
+const { videos, id } = Astro.props;
+
+const ids = videos.map(video => {
+  const url = new URL(video);
+  let videoId = '';
+  if (url.hostname === 'www.youtube.com') {
+    if (url.pathname.startsWith('/embed/')) {
+      videoId = url.pathname.split('/')[1];
+    } else if (url.searchParams.has('v')) {
+      videoId = url.searchParams.get('v') || '';
+    }
+  } else if (url.hostname === 'youtu.be') {
+    videoId = url.pathname;
+  }
+
+  return videoId;
+});
+---
+
+<div
+  id={id || 'youtube-gallery'}
+  class="youtube-gallery w-full grid grid-cols-2 gap-4 lg:grid-cols-3"
+>
+  <dialog
+    autofocus
+    class="backdrop:bg-black/80 bg-transparent w-full h-full open:flex flex-col gap-4 justify-center items-center"
+  >
+    <div class="flex justify-end w-full">
+      <button class="dialog-close text-white flex items-center gap-2 text-xs"
+        >Cerrar <Image
+          src="/assets/close.icon.svg"
+          alt="Anterior"
+          class="w-4 h-4 text-white"
+          width={15}
+          height={15}
+          loading="eager"
+        />
+      </button>
+    </div>
+    <div class="relative aspect-video w-full">
+      <iframe
+        class="absolute top-0 left-0 w-full h-full"
+        src=""
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+        allowfullscreen></iframe>
+    </div>
+    <div class="flex justify-between w-full">
+      <button class="dialog-prev text-white flex items-center gap-2"
+        ><Image
+          src="/assets/chevron-left.icon.svg"
+          alt="Anterior"
+          class="w-4 h-4"
+          width={15}
+          height={15}
+          loading="eager"
+        /> Anterior</button
+      >
+      <button class="dialog-next text-white flex items-center gap-2"
+        >Siguiente <Image
+          src="/assets/chevron-right.icon.svg"
+          alt="Anterior"
+          class="w-4 h-4"
+          width={15}
+          height={15}
+          loading="eager"
+        />
+      </button>
+    </div>
+  </dialog>
+  {
+    ids.map((id, index) => (
+      <button
+        class="video-thumbnail relative w-full h-full aspect-video cursor-pointer"
+        data-video-id={id}
+        data-index={index}
+      >
+        <Image
+          src={`https://img.youtube.com/vi/${id}/maxresdefault.jpg`}
+          alt="video"
+          width={640}
+          height={360}
+          loading="lazy"
+          class="absolute top-0 left-0 w-full h-full object-cover"
+        />
+        <Image
+          src="/assets/play.icon.svg"
+          alt="play"
+          width={50}
+          height={50}
+          loading="eager"
+          class="absolute top-0 bottom-0 left-0 right-0 m-auto"
+        />
+      </button>
+    ))
+  }
+</div>
+
+<script define:vars={{ id }} is:inline>
+  const galleryId = id || 'youtube-gallery';
+  const videoButtons = document.querySelectorAll(
+    `#${galleryId} button.video-thumbnail`
+  );
+  const prevButton = document.querySelector(
+    `#${galleryId} dialog button.dialog-prev`
+  );
+  const nextButton = document.querySelector(
+    `#${galleryId} dialog button.dialog-next`
+  );
+  const closeButton = document.querySelector(
+    `#${galleryId} dialog button.dialog-close`
+  );
+  let currentIndex = 0;
+
+  videoButtons.forEach(video => {
+    video.addEventListener('click', e => {
+      const index = +(e.currentTarget?.getAttribute('data-index') || '0');
+      showVideo(index);
+    });
+  });
+
+  prevButton?.addEventListener('click', () => {
+    if (currentIndex > 0) {
+      showVideo(currentIndex - 1);
+    } else {
+      showVideo(videoButtons.length - 1);
+    }
+  });
+
+  nextButton?.addEventListener('click', () => {
+    if (currentIndex < videoButtons.length - 1) {
+      showVideo(currentIndex + 1);
+    } else {
+      showVideo(0);
+    }
+  });
+
+  closeButton?.addEventListener('click', () => {
+    const dialog = document.querySelector(`#${galleryId} dialog`);
+    if (dialog) {
+      const iframe = dialog.querySelector('iframe');
+
+      if (iframe) {
+        iframe.src = '';
+      }
+      dialog?.close();
+    }
+  });
+
+  const showVideo = index => {
+    currentIndex = index;
+    const videoId = videoButtons[index].getAttribute('data-video-id');
+    const dialog = document.querySelector(`#${galleryId} dialog`);
+    if (dialog) {
+      const iframe = dialog.querySelector('iframe');
+
+      if (iframe) {
+        iframe.src = `https://www.youtube.com/embed/${videoId}`;
+        dialog.showModal();
+      }
+    }
+  };
+</script>

@@ -1,0 +1,235 @@
+---
+import { directusFileURL } from '@/utils/directus';
+import { Image } from 'astro:assets';
+import { parseISO, format } from 'date-fns';
+
+export interface CourseCardProps {
+  id: string;
+  title: string;
+  image: string;
+  certifier?: string;
+  certifierLogo?: string;
+  start: string;
+  duration?: string;
+  price?: number;
+  partnerPrice?: number;
+  type: string;
+  class?: string;
+  providerImage?: string;
+  category: string;
+  url?: string;
+  labelGeneralAdmission?: string;
+  labelPartner?: string;
+  enrollButtonText?: string;
+  showEnrollButton?: boolean;
+}
+
+const {
+  id,
+  title,
+  image,
+  certifier,
+  certifierLogo,
+  start,
+  duration,
+  price,
+  partnerPrice,
+  class: className,
+  type,
+  category,
+  providerImage,
+  url,
+  labelGeneralAdmission = '',
+  labelPartner = '',
+  enrollButtonText = '',
+  showEnrollButton = false,
+} = Astro.props as CourseCardProps;
+
+const percentage =
+  price && partnerPrice ? ((partnerPrice / price) * 100 - 100).toFixed(0) : '';
+
+const defaultUrl = `/cursos/${id}`;
+
+const imageXS = directusFileURL(image, {
+  width: 180,
+  height: 145,
+  format: 'webp',
+  quality: 50,
+  fit: 'cover',
+});
+const imageSM = directusFileURL(image, {
+  width: 240,
+  height: 256,
+  format: 'webp',
+  quality: 50,
+  fit: 'cover',
+});
+const imageLG = directusFileURL(image, {
+  width: 305,
+  height: 256,
+  format: 'webp',
+  quality: 50,
+  fit: 'cover',
+});
+const imageXL = directusFileURL(image, {
+  width: 368,
+  height: 256,
+  format: 'webp',
+  quality: 50,
+  fit: 'cover',
+});
+---
+
+<article
+  class:list={[
+    'course-card grid grid-rows-[auto_1fr] rounded-lg bg-white overflow-hidden w-[168px] shadow-dm md:w-full relative',
+    '[&>picture>img]:grayscale hover:[&>picture>img]:grayscale-0 h-full',
+    className,
+  ]}
+>
+  <picture>
+    <source srcset={imageXL} media="(min-width: 1280px)" type="image/webp" />
+    <source srcset={imageLG} media="(min-width: 1024px)" type="image/webp" />
+    <source srcset={imageSM} media="(min-width: 768px)" type="image/webp" />
+
+    <img
+      src={imageXS}
+      alt={title}
+      width={168}
+      height={145}
+      class="w-[168px] h-[145px] object-cover md:w-full lg:h-[256px] transition-all"
+      transition:name={`image-course-${id}`}
+    />
+  </picture>
+
+  <span
+    class="bg-primary text-white absolute left-0 top-6 px-2 py-1 text-[10px] font-bold rounded-br-lg uppercase"
+    >{category}</span
+  >
+  {
+    !!providerImage && (
+      <span class="absolute right-0 top-4 flex px-4 py-2 rounded-l-lg bg-white">
+        <img
+          src={providerImage}
+          alt="provider"
+          class="w-auto h-[15px] lg:h-[30px]"
+          width={100}
+          height={30}
+        />
+      </span>
+    )
+  }
+  <div
+    class:list={[
+      'grid grid-rows-[1fr_auto_auto_32px_auto] p-3 gap-4 lg:p-4 lg:grid-rows-[1fr_auto_auto_45.5px_auto] ',
+      {
+        // 'h-[312.5px]': type === 'internal',
+        'h-auto': type === 'external',
+      },
+    ]}
+  >
+    <a
+      title={title}
+      class="block"
+      href={!!url ? url : defaultUrl}
+      target={url ? '_blank' : '_self'}
+      ><h2 class="text-secondary text-sm font-bold line-clamp-3 lg:text-lg">
+        {title}
+      </h2></a
+    >
+    {
+      type === 'internal' && !!certifier ? (
+        <div class="grid items-center gap-2 grid-cols-[auto_1fr]">
+          <span class="w-[17px] h-[17px] rounded-full bg-dm-gray-1 lg:w-[30px] lg:h-[30px] flex justify-between items-center p-1">
+            {certifierLogo && <img src={directusFileURL(certifierLogo)} />}
+          </span>
+          <span class="text-[10px] font-bold lg:text-sm xl:text-base">
+            {certifier}
+          </span>
+        </div>
+      ) : (
+        <div />
+      )
+    }
+    <div
+      class="grid grid-cols-[1fr_auto] gap-2 text-[10px] border-b border-dm-gray-2 pb-2"
+    >
+      <span class="font-bold">
+        Inicio: {format(parseISO(start), 'dd / MM / yyyy')}
+      </span>
+      <span>{duration}</span>
+    </div>
+
+    <div class="h-[45.5px]">
+      {
+        price === 0 ? (
+          <span class="text-xs font-bold text-secondary lg:text-2xl">
+            Gratuito
+          </span>
+        ) : (
+          <div
+            class:list={[
+              'grid  gap-2 gap-y-0',
+              {
+                'grid-cols-2': partnerPrice && price,
+                'grid-cols-1': !partnerPrice || !price,
+              },
+            ]}
+          >
+            {partnerPrice && (
+              <span class="text-[7px] font-bold text-dm-gray-2 lg:text-[9px] min-h-[13.5px]">
+                {price ? `-${percentage}% ` : ''} {labelPartner}
+              </span>
+            )}
+            {price && (
+              <span class="text-[7px] font-bold text-dm-gray-2 lg:text-[9px]">
+                {labelGeneralAdmission}
+              </span>
+            )}
+            {partnerPrice && (
+              <span class="text-secondary font-bold text-sm lg:text-2xl">
+                {partnerPrice > 0 ? (
+                  <span>
+                    <span class="font-bold text-sm lg:text-base min-h-[13.5px]">
+                      S/.
+                    </span>{' '}
+                    {partnerPrice}
+                  </span>
+                ) : (
+                  <span class="font-bold text-sm lg:text-base">Gratuito</span>
+                )}
+              </span>
+            )}
+            {price && (
+              <span class="text-secondary text-sm lg:text-2xl">
+                <span class="text-sm lg:text-base">S/.</span> {price}
+              </span>
+            )}
+          </div>
+        )
+      }
+    </div>
+
+    <div class="flex flex-col gap-2 lg:flex-row">
+      {
+        type === 'internal' && showEnrollButton && (
+          <button
+            data-action="inscription"
+            data-course-id={id}
+            data-course-name={title}
+            class="transition-color bg-secondary border border-secondary hover:border-primary hover:bg-primary text-white px-4 py-1 text-[10px] font-bold rounded-lg xl:text-sm lg:py-2"
+          >
+            {enrollButtonText}
+          </button>
+        )
+      }
+      <a
+        class="transition-color bg-white border border-secondary text-center text-secondary hover:border-primary hover:text-primary px-4 py-1 text-[10px] font-bold rounded-lg xl:text-sm lg:py-2"
+        href={!!url ? url : defaultUrl}
+        target={url ? '_blank' : '_self'}
+      >
+        Más info
+      </a>
+    </div>
+  </div>
+</article>

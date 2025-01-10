@@ -1,0 +1,67 @@
+---
+export interface AccordionItemProps {
+  header: string;
+  children: any;
+}
+
+const { header } = Astro.props;
+---
+
+<li class="accordion__item w-full py-2">
+  <h3>
+    <button
+      id="accordion-header-1"
+      class="accordion__header w-full flex justify-between rounded-lg bg-primary p-4 text-white font-semibold items-center text-left"
+      aria-expanded="false"
+      aria-controls="accordion-panel-1"
+      onclick="toggleAccordionItem()"
+    >
+      {header}
+      <svg
+        class="header__toggle-indicator"
+        width="16"
+        height="9"
+        viewBox="0 0 16 9"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path
+          d="M13.5481 0.399753L7.99284 5.70273L2.43758 0.399753C2.17008 0.143827 1.80692 0 1.42819 0C1.04946 0 0.686291 0.143827 0.418792 0.399753C-0.139597 0.932784 -0.139597 1.79383 0.418792 2.32686L6.9906 8.60023C7.54899 9.13326 8.45101 9.13326 9.0094 8.60023L15.5812 2.32686C16.1396 1.79383 16.1396 0.932784 15.5812 0.399753C15.0228 -0.11961 14.1065 -0.133277 13.5481 0.399753Z"
+          fill="white"></path>
+      </svg>
+    </button>
+  </h3>
+  <div
+    id="accordion-panel-1"
+    role="region"
+    class="accordion__panel bg-dm-gray-1"
+    aria-labelledby="accordion-header-1"
+  >
+    <div class="panel__inner p-4 text-sm">
+      <slot />
+    </div>
+  </div>
+</li>
+
+<style is:global>
+  .accordion__panel {
+    visibility: hidden;
+    overflow: hidden;
+    height: 0;
+    transition:
+      height 0.3s ease-in-out,
+      visibility 0s 0.3s;
+  }
+
+  .is-active .accordion__header {
+    @apply rounded-b-none;
+  }
+
+  .is-active .accordion__panel {
+    visibility: visible;
+    height: auto;
+    transition:
+      height 0.3s ease-in-out,
+      visibility 0s 0s;
+  }
+</style>

@@ -1,0 +1,346 @@
+---
+import { Image } from 'astro:assets';
+import DMDialog from './dm-dialog.astro';
+import Spinner from './spinner.astro';
+import { directus, type NavItem } from '@/utils/directus';
+import { readSingleton } from '@directus/sdk';
+
+interface Props {
+  logo?: string;
+}
+const { logo } = Astro.props;
+const logoDefault = '/assets/img/logo-header.png';
+const menu = await directus.request(
+  readSingleton('mainMenu', { fields: ['*', { items: ['*'] }] })
+);
+
+const navItems = (menu.items as NavItem[])?.filter(item => item.enabled);
+
+const moodleLoginUrl = import.meta.env.MOODLE_LOGIN_URL;
+---
+
+<header-element class="sticky top-0 z-[100]">
+  <header class="bg-white w-full sticky top-0 z-[100] shadow-header">
+    <div
+      class="container mx-auto p-4 grid grid-cols-[1fr_auto_auto_auto] lg:grid-cols-[auto_1fr_auto_auto] items-center gap-4 lg:gap-4 xl:gap-16"
+    >
+      <a href="/">
+        <h1>
+          <Image
+            src={logo || logoDefault}
+            alt="DM formación"
+            class="block"
+            width={138}
+            height={35}
+            loading="eager"
+          />
+        </h1>
+      </a>
+      <nav
+        class="hidden absolute top-full left-0 right-0 bg-white lg:block lg:relative lg:top-0"
+        id="menu"
+      >
+        <div
+          class="container mx-auto flex-col bg-white flex items-end p-4 lg:p-0 lg:justify-center lg:items-center lg:gap-4 xl:gap-11 lg:flex lg:flex-row lg:w-auto lg:top-0"
+        >
+          {
+            navItems.map(item => (
+              <a
+                href={item.href}
+                class="group text-primary relative text-[18px]"
+                target={item.blank ? '_blank' : '_self'}
+              >
+                <span class="font-bold group-hover:opacity-100 opacity-0 text-right w-full lg:text-center">
+                  {item.label}
+                </span>
+                <span class="absolute top-0 left-0 group-hover:opacity-0 text-right w-full lg:text-center">
+                  {item.label}
+                </span>
+              </a>
+            ))
+          }
+        </div>
+      </nav>
+      <div>
+        <button class="lg:hidden" type="button" id="btn-search">
+          <Image
+            src="/assets/img/search.svg"
+            width={17}
+            height={17}
+            alt="Search"
+            class="left-4 top-0 bottom-0 my-auto"
+          />
+        </button>
+        <form
+          method="get"
+          action="/buscar"
+          class="hidden bg-white absolute top-full left-0 right-0 lg:block lg:relative"
+          id="search"
+        >
+          <div
+            class="continer mx-auto p-4 lg:p-0 grid grid-cols-[1fr_auto] gap-4 items-center lg:block lg:w-auto"
+          >
+            <div class="relative">
+              <input
+                name="q"
+                type="text"
+                class="w-full bg-[#F6F5F9]/80 rounded-[3px] pl-12 pr-4 py-2 placeholder:font-light placeholder:text-dm-gray-2"
+                placeholder="Buscar curso"
+              />
+              <Image
+                src="/assets/img/search.svg"
+                width={17}
+                height={17}
+                alt="Search"
+                class="absolute left-4 top-0 bottom-0 my-auto"
+              />
+              <Image
+                id="clear-search"
+                src="/assets/x-circle.icon.svg"
+                width={20}
+                height={20}
+                alt="Clear"
+                class="absolute right-2 top-0 bottom-0 my-auto cursor-pointer hidden"
+              />
+            </div>
+            <button
+              type="submit"
+              class="text-primary px-4 py-2 border border-primary rounded-md lg:hidden"
+              >Buscar</button
+            >
+          </div>
+        </form>
+      </div>
+      <div>
+        <button
+          onclick="window.login.showModal()"
+          class="text-primary border border-primary rounded-[5px] px-4 py-2 text-xs font-bold"
+        >
+          Ingresar al aula virtual
+        </button>
+      </div>
+      <div class="lg:hidden">
+        <button id="btn-menu" class="lg:hidden" type="button">
+          <Image
+            src="/assets/img/menu.svg"
+            width={25}
+            height={17}
+            alt="Menu"
+            class="left-4 top-0 bottom-0 my-auto"
+          />
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <DMDialog id="login">
+    <form
+      method="POST"
+      action={moodleLoginUrl}
+      enctype="application/x-www-form-urlencoded"
+      class="flex flex-col items-center justify-center gap-4"
+      data-astro-reload
+    >
+      <div class="text-secondary font-bold text-xl text-center">
+        Ingresa al aula virtual
+      </div>
+      <div class="w-full">
+        <input
+          type="text"
+          name="username"
+          placeholder="Nro de documento"
+          class="w-full text-dm-gray-6 placeholder:text-dm-gray-6 bg-dm-gray-5/80 rounded-lg text-lg p-4"
+        />
+        <span class="text-xs text-red-500 error-message"></span>
+      </div>
+
+      <div class="w-full">
+        <input
+          type="password"
+          name="password"
+          placeholder="Contraseña"
+          class="w-full text-dm-gray-6 placeholder:text-dm-gray-6 bg-dm-gray-5/80 rounded-lg text-lg p-4"
+        />
+        <span class="text-xs text-red-500 error-message"></span>
+      </div>
+
+      <div class="w-full flex justify-center">
+        <button
+          id="forgot-password-login"
+          type="button"
+          class="text-secondary text-sm">¿No recuerdas tu contraseña?</button
+        >
+      </div>
+
+      <div class="flex gap-4 justify-center">
+        <button
+          class="bg-secondary text-white rounded-lg px-4 py-2 border border-transparent hover:bg-primary hover:border-primary"
+          type="submit"
+        >
+          Ingresar
+        </button>
+      </div>
+    </form>
+  </DMDialog>
+
+  <DMDialog id="forgotPassword">
+    <form class="flex flex-col items-center justify-center gap-4">
+      <div class="text-secondary font-bold text-xl text-center">
+        Ingresa tu nro de documento
+      </div>
+      <div class="w-full">
+        <input
+          type="text"
+          name="document"
+          placeholder="Nro de documento"
+          class="w-full text-dm-gray-6 placeholder:text-dm-gray-6 bg-dm-gray-5/80 rounded-lg text-lg p-4"
+        />
+        <span class="text-xs text-red-500 error-message"></span>
+      </div>
+
+      <div class="flex gap-4 justify-center actions">
+        <button
+          class="bg-secondary text-white rounded-lg px-4 py-2 border border-transparent hover:bg-primary hover:border-primary"
+          type="submit"
+        >
+          Enviar
+        </button>
+      </div>
+      <Spinner class="hidden" />
+    </form>
+  </DMDialog>
+</header-element>
+
+<script>
+  import { isInputError } from 'astro:actions';
+  import { actions } from 'astro:actions';
+  class HeaderElement extends HTMLElement {
+    constructor() {
+      super();
+
+      const btnMenu = document.getElementById('btn-menu');
+      const menu = document.getElementById('menu');
+
+      const btnSearch = document.getElementById('btn-search');
+      const search = document.getElementById('search');
+
+      btnSearch?.addEventListener('click', () => {
+        search?.classList.toggle('hidden');
+        menu?.classList.add('hidden');
+      });
+
+      btnMenu?.addEventListener('click', () => {
+        menu?.classList.toggle('hidden');
+        search?.classList.add('hidden');
+      });
+
+      // clear search
+      const clearSearch = document.getElementById('clear-search');
+      const searchInput: HTMLInputElement =
+        document.querySelector('input[name="q"]')!;
+      searchInput?.addEventListener('input', e => {
+        clearSearch?.classList.toggle('hidden', !searchInput.value);
+      });
+
+      clearSearch?.addEventListener('click', () => {
+        searchInput.value = '';
+      });
+
+      const loginDialog = document.getElementById('login');
+      const forgotPasswordButton = loginDialog?.querySelector(
+        '#forgot-password-login'
+      );
+      const forgotPasswordDialog = document.getElementById('forgotPassword');
+      const forgotPasswordForm = forgotPasswordDialog?.querySelector('form');
+
+      forgotPasswordButton?.addEventListener('click', () => {
+        (loginDialog as HTMLDialogElement)?.close();
+        clearErrors();
+        (forgotPasswordDialog as HTMLDialogElement)?.showModal();
+      });
+
+      [loginDialog, forgotPasswordDialog].forEach(dialog => {
+        dialog?.addEventListener('close', () => {
+          const form = dialog?.querySelector('form');
+          if (form) form.reset();
+        });
+      });
+
+      const onSubmit = async (e: SubmitEvent) => {
+        e.preventDefault();
+        clearErrors();
+        setLoading(true);
+        const formData = new FormData(e.currentTarget as HTMLFormElement);
+        const { data, error } = await actions.forgotPassword(formData);
+        setLoading(false);
+        if (error) {
+          console.log(error);
+          if (isInputError(error)) {
+            showErrors(error.fields);
+          } else {
+            showServerError(error.message);
+          }
+        }
+
+        if (data?.success) {
+          const successBanner =
+            forgotPasswordDialog?.querySelector('.server-success');
+          if (successBanner) {
+            successBanner.innerHTML =
+              'Hemos recibido tu solicitud, recibirás un correco electrónico con el siguiente paso';
+            successBanner?.classList.remove('hidden');
+          }
+        }
+      };
+
+      //@ts-ignore
+      forgotPasswordForm?.addEventListener('submit', onSubmit);
+
+      const showErrors = (errors: {
+        [field: string]: string[] | undefined;
+      }) => {
+        Object.entries(errors).forEach(([name, messages]) => {
+          const errorField = forgotPasswordDialog
+            ?.querySelector(`[name="${name}"]`)
+            ?.parentElement?.querySelector('.error-message');
+          if (errorField && messages && messages?.length > 0)
+            errorField.innerHTML = messages[0];
+        });
+      };
+
+      const showServerError = (message: string) => {
+        const serverError =
+          forgotPasswordDialog?.querySelector('.server-error');
+        if (serverError) {
+          serverError.innerHTML = message;
+          serverError.classList.remove('hidden');
+        }
+      };
+
+      const clearErrors = () => {
+        forgotPasswordDialog
+          ?.querySelectorAll('.error-message')
+          .forEach(errorField => (errorField.innerHTML = ''));
+
+        forgotPasswordForm
+          ?.querySelector('.server-error')
+          ?.classList.add('hidden');
+
+        forgotPasswordForm
+          ?.querySelector('.server-success')
+          ?.classList.add('hidden');
+      };
+
+      const setLoading = (loading: boolean) => {
+        forgotPasswordDialog
+          ?.querySelector('.spinner')
+          ?.classList.toggle('hidden', !loading);
+        forgotPasswordDialog
+          ?.querySelector('.actions')
+          ?.classList.toggle('hidden', loading);
+      };
+    }
+  }
+
+  customElements.define('header-element', HeaderElement);
+</script>

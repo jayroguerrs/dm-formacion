@@ -1,0 +1,211 @@
+---
+import { Image } from 'astro:assets';
+import Layout from '@/layouts/root.layout.astro';
+import {
+  directus,
+  directusFileURL,
+  type ImageBlock,
+  type VideoBlock,
+  type File,
+} from '@/utils/directus';
+import { readFile, readItems } from '@directus/sdk';
+import { format, parseISO } from 'date-fns';
+import { WYSIWYG_CLASSES } from '@/utils/constants';
+import YoutubeGallery from '@/components/youtube-gallery.astro';
+import ImageGallery from '@/components/image-gallery.astro';
+import FilesList from '@/components/files-list.astro';
+import { convert } from 'html-to-text';
+import SEO from '@/components/seo.astro';
+import Breadcrumb from '@/components/breadcrumb.astro';
+
+const { id } = Astro.params;
+
+const [event] = await directus.request(
+  readItems('event', {
+    filter: { id: { _eq: id || '' } },
+    fields: ['*', { images: ['*'], videos: ['*'], files: ['*'] }],
+  })
+);
+
+if (!event) return Astro.redirect('/404');
+
+const files = await Promise.all(
+  (event.files as File[]).map(({ directus_files_id }) =>
+    directus.request(readFile(directus_files_id))
+  )
+);
+
+const startDate = parseISO(event.start);
+const endDate = parseISO(event.end);
+
+const sameDay =
+  format(startDate, 'yyyy-MM-dd') === format(endDate, 'yyyy-MM-dd');
+const sameMonth = format(startDate, 'yyyy-MM') === format(endDate, 'yyyy-MM');
+const sameYear = format(startDate, 'yyyy') === format(endDate, 'yyyy');
+
+const dates = sameDay
+  ? format(startDate, 'dd/MM/yyyy')
+  : sameMonth || sameYear
+    ? `Del ${format(startDate, 'dd/MM')} al ${format(endDate, 'dd/MM')}`
+    : `${format(startDate, 'dd/MM/yyyy')} - ${format(endDate, 'dd/MM/yyyy')}`;
+
+const tabs = [
+  { text: 'Videos', id: 'videos', enabled: !!event.videos?.length },
+  { text: 'Fotografías', id: 'images', enabled: !!event.images?.length },
+  {
+    text: 'Archivos relacionados',
+    id: 'files',
+    enabled: !!event.files?.length,
+  },
+].filter(tab => tab.enabled);
+---
+
+<SEO
+  title={event.title}
+  description={convert(event.description)}
+  image={event.image}
+  type="article"
+/>
+
+<Layout>
+  <Breadcrumb
+    items={[
+      { text: 'Home', url: '/', icon: '/assets/home.icon.svg' },
+      { text: 'Eventos', url: '/eventos' },
+      { text: 'Detalle del evento' },
+    ]}
+  />
+  <div class="flex flex-col gap-4 pb-4">
+    <div class="relative w-full">
+      <Image
+        src={directusFileURL(event.image)}
+        alt={event.title}
+        width={700}
+        height={400}
+        loading="eager"
+        class="object-cover w-full h-full absolute top-0 left-0 -z-[1]"
+      />
+      <div
+        class="bg-gradient-to-r from-[#552685] to-primary w-full h-full absolute top-0 left-0 -z-[1] opacity-85"
+      >
+      </div>
+      <div class="container mx-auto px-4 py-8 flex flex-col gap-4">
+        <button
+          onclick="window.history.back()"
+          class="flex gap-4 items-center text-white text-sm"
+        >
+          <Image
+            src="/assets/chevron-left.icon.svg"
+            alt="back"
+            width="9"
+            height="17"
+            loading="eager"
+          />
+          <span>Ir atrás</span>
+        </button>
+        <h1 class="font-bold text-white text-3xl px-4 lg:text-4xl">
+          {event.title}
+        </h1>
+        <span class="text-white px-4 text-lg lg:text-2xl">{dates}</span>
+      </div>
+    </div>
+
+    <div class="container px-4 py-8 mx-auto flex flex-col gap-4">
+      <div
+        class:list={[WYSIWYG_CLASSES, 'text-center']}
+        set:html={event.description}
+      />
+      <div class="flex justify-center">
+        <a
+          href={event.url}
+          class="text-primary text-sm border border-primary px-4 py-2 rounded-md"
+          >Más Información</a
+        >
+      </div>
+    </div>
+
+    <div class="bg-[#F9FAFF] py-12 relative overflow-hidden">
+      <span
+        class="rounded-full bg-[#F5F6F7] w-[352px] h-[352px] absolute left-[-42px] top-[72px]"
+      ></span>
+      <span
+        class="rounded-full bg-[#9EA5AC] w-[150px] h-[150px] absolute right-[-75px] top-[128px] opacity-[0.1]"
+      ></span>
+      <Image
+        src="/assets/img/events-dots.svg"
+        alt="dots"
+        width="224"
+        height="224"
+        class="absolute right-[-80px] bottom-[50px] w-[224px] h-[224px]"
+      />
+      <div
+        class="container p-4 mx-auto flex gap-4 lg:justify-center relative z-[2]"
+      >
+        {
+          tabs.map(tab => (
+            <button
+              type="button"
+              class="tab text-dm-gray-2 border-b-2 border-transparent hover:text-primary hover:border-primary transition-colors text-sm lg:text-base px-2"
+              data-content-id={tab.id}
+            >
+              {tab.text}
+            </button>
+          ))
+        }
+      </div>
+      <div class="container px-4 py mx-auto relative">
+        <div id="videos" class="tab-content hidden">
+          <YoutubeGallery
+            videos={(event.videos as VideoBlock[]).map(({ video }) => video)}
+          />
+        </div>
+        <div id="images" class="tab-content hidden">
+          <ImageGallery
+            images={(event.images as ImageBlock[])?.map(({ image }) => image)}
+          />
+        </div>
+        <div id="files" class="tab-content hidden">
+          <FilesList
+            files={files.map(file => ({
+              id: file.id,
+              title: file.title || 'Archivo sin título',
+              filename: file.filename_download,
+              type: file.type || 'desconocido',
+            }))}
+          />
+        </div>
+      </div>
+    </div>
+  </div>
+</Layout>
+
+<script type="module" is:inline>
+  const tabs = document.querySelectorAll('.tab');
+  const activeTabClass = ['text-primary', 'border-primary'];
+  const inactiveTabClass = ['text-dm-gray-2', 'border-transparent'];
+
+  tabs.forEach(tab => {
+    tab.addEventListener('click', () => {
+      const tabContent = document.querySelectorAll('.tab-content');
+      tabContent.forEach(tab => tab.classList.add('hidden'));
+
+      tabs.forEach(otherTab => {
+        otherTab.classList.remove(...activeTabClass);
+        otherTab.classList.add(...inactiveTabClass);
+      });
+
+      tab.classList.add(...activeTabClass);
+      tab.classList.remove(...inactiveTabClass);
+
+      document
+        .querySelector(`#${tab.getAttribute('data-content-id')}`)
+        .classList.remove('hidden');
+    });
+  });
+
+  tabs[0].classList.add(...activeTabClass);
+  tabs[0].classList.remove(...inactiveTabClass);
+  document
+    .querySelector(`#${tabs[0].getAttribute('data-content-id')}`)
+    .classList.remove('hidden');
+</script>

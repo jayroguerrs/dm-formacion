@@ -1,0 +1,144 @@
+---
+import { Image } from 'astro:assets';
+import ProfessorLandingCard from './professor-landing-card.astro';
+import 'swiper/css';
+
+interface Props {
+  id?: string;
+  professors: {
+    image: string;
+    name: string;
+    profession: string;
+    linkedin: string;
+    description: string;
+    descriptionList: string;
+  }[];
+}
+
+const { professors, id = 'professor-landing-carousel' } = Astro.props;
+---
+
+<style>
+  .swiper {
+    width: 100%;
+    height: 100%;
+
+    @media (min-width: 768px) {
+      overflow: visible;
+    }
+  }
+
+  .swiper-slide {
+    display: flex !important;
+    justify-content: center;
+    align-items: center;
+    height: auto !important;
+    /* width: 183px !important; */
+
+    /* @media (min-width: 768px) {
+      width: 33.333% !important;
+      padding: 0 0.5rem;
+
+      &:first-child {
+        padding-left: 0;
+      }
+
+      &:last-child {
+        padding-right: 0;
+      }
+    } */
+  }
+
+  .carousel-navigation {
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 50;
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    padding: 0 1rem;
+
+    @media (min-width: 1024px) {
+      top: 50%;
+      margin-top: -15px;
+      padding: 0;
+    }
+  }
+</style>
+
+<professor-landing-carousel data-id={id}>
+  <div
+    id={id}
+    class="professor-landing-carousel container mx-auto p-4 relative lg:max-w-4xl"
+  >
+    <div class="carousel-navigation">
+      <button class="button-prev disabled:opacity-0" type="button">
+        <Image
+          src="/assets/img/prev-gray.svg"
+          alt="prev"
+          width="16"
+          height="30"
+          loading="eager"
+        />
+      </button>
+      <button class="button-next disabled:opacity-0" type="button">
+        <Image
+          src="/assets/img/next-gray.svg"
+          alt="next"
+          width="16"
+          height="30"
+          loading="eager"
+        />
+      </button>
+    </div>
+    <div
+      class="max-w-[calc(100vw_-_3rem)] sm:w-full overflow-hidden h-full lg:px-4"
+    >
+      <div class="swiper">
+        <div
+          class:list={[
+            'swiper-wrapper',
+            { 'flex justify-center ': professors.length === 1 },
+          ]}
+        >
+          {
+            professors.map(professor => (
+              <div class="swiper-slide">
+                <ProfessorLandingCard {...professor} />
+              </div>
+            ))
+          }
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" is:inline>
+    import Swiper from 'https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.mjs';
+
+    class ProfessorLandingCarousel extends HTMLElement {
+      constructor() {
+        super();
+
+        this.id = this.dataset.id;
+        this.swiper = new Swiper(`#${this.id} .swiper`, {
+          speed: 500,
+          navigation: {
+            nextEl: `#${this.id} .button-next`,
+            prevEl: `#${this.id} .button-prev`,
+          },
+          centeredSlides: false,
+          slidesPerView: 2,
+          spaceBetween: 16,
+          draggable: false,
+        });
+      }
+    }
+    customElements.get('professor-landing-carousel') ||
+      customElements.define(
+        'professor-landing-carousel',
+        ProfessorLandingCarousel
+      );
+  </script>
+</professor-landing-carousel>

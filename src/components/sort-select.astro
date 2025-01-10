@@ -1,0 +1,50 @@
+---
+interface Props {
+  sortOptions: Array<{ value: string; text: string }>;
+  sort: string;
+}
+
+const { sortOptions, sort } = Astro.props;
+---
+
+<sort-select>
+  <select
+    id="sort"
+    class="border border-dm-gray-2 h-fit rounded-md px-4 py-2 text-sm hover:border-primary hover:text-primary"
+  >
+    {
+      sortOptions.map(option => (
+        <option value={option.value} selected={option.value === sort}>
+          {option.text}
+        </option>
+      ))
+    }
+  </select>
+</sort-select>
+
+<script>
+  import { navigate } from 'astro:transitions/client';
+
+  class SortSelect extends HTMLElement {
+    constructor() {
+      super();
+
+      const sortSelector = this.querySelector('select');
+      if (sortSelector) {
+        sortSelector.onchange = e => {
+          const sort = (e.target as HTMLSelectElement)?.value;
+          const url = new URL(window.location.href);
+          url.searchParams.set('orden', sort);
+
+          if (url.searchParams.get('pagina'))
+            url.searchParams.set('pagina', '1');
+
+          navigate(`${url.pathname}${url.search}`, { history: 'push' });
+        };
+      }
+    }
+  }
+
+  customElements.get('sort-select') ||
+    customElements.define('sort-select', SortSelect);
+</script>

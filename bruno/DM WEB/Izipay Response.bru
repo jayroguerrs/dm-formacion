@@ -1,0 +1,94 @@
+meta {
+  name: Izipay Response
+  type: http
+  seq: 2
+}
+
+post {
+  url: http://localhost:4321/api/registro-pago
+  body: json
+  auth: none
+}
+
+headers {
+  transactionId: 1732054710618
+  ~Content-Type: application/json; charset=utf-8
+}
+
+body:json {
+  {
+    "code": "00",
+    "message": "OK",
+    "messageUser": "Operación exitosa",
+    "messageUserEng": "Successful",
+    "response": {
+      "payMethod": "CARD",
+      "order": [
+        {
+          "payMethodAuthorization": "CARD",
+          "codeAuth": "S88257",
+          "currency": "PEN",
+          "amount": "250.00",
+          "installment": "00",
+          "deferred": "0",
+          "orderNumber": "000000000000168",
+          "stateMessage": "Autorizado",
+          "dateTransaction": "20241119",
+          "timeTransaction": "171845",
+          "uniqueId": "449948439",
+          "referenceNumber": "9000000"
+        }
+      ],
+      "card": {
+        "brand": "VS",
+        "pan": "497010******0055",
+        "save": "false"
+      },
+      "billing": {
+        "firstName": "Carlos",
+        "lastName": "Yano",
+        "email": "yano.tomadm@gmail.com",
+        "phoneNumber": "9057828467",
+        "street": "123456",
+        "city": "prov const del callao",
+        "state": "callao",
+        "country": "PE",
+        "postalCode": "12345",
+        "documentType": "DNI",
+        "document": "44088132",
+        "companyName": "123"
+      },
+      "merchant": {
+        "merchantCode": "4004353",
+        "facilitatorCode": ""
+      },
+      "token": {
+        "merchantBuyerId": "b7b7a3bd-fec4-4cae-90a4-c5069c880903",
+        "cardToken": "",
+        "alias": ""
+      },
+      "authentication": {
+        "result": ""
+      },
+      "customFields": [
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        ""
+      ],
+      "miles": {
+        "netMiles": "",
+        "miles": ""
+      }
+    },
+    "payloadHttp": "{\"code\":\"00\",\"message\":\"OK\",\"messageUser\":\"Operación exitosa\",\"messageUserEng\":\"Successful\",\"transactionId\":\"1732054710618\",\"response\":{\"payMethod\":\"CARD\",\"order\":[{\"payMethodAuthorization\":\"CARD\",\"codeAuth\":\"S88257\",\"currency\":\"PEN\",\"amount\":\"250.00\",\"installment\":\"00\",\"deferred\":\"0\",\"orderNumber\":\"000000000000168\",\"stateMessage\":\"Autorizado\",\"dateTransaction\":\"20241119\",\"timeTransaction\":\"171845\",\"uniqueId\":\"449948439\",\"referenceNumber\":\"9000000\"}],\"card\":{\"brand\":\"VS\",\"pan\":\"497010******0055\",\"save\":\"false\"},\"billing\":{\"firstName\":\"Carlos\",\"lastName\":\"Yano\",\"email\":\"yano.tomadm@gmail.com\",\"phoneNumber\":\"9057828467\",\"street\":\"123456\",\"city\":\"prov const del callao\",\"state\":\"callao\",\"country\":\"PE\",\"postalCode\":\"12345\",\"documentType\":\"DNI\",\"document\":\"44088132\",\"companyName\":\"123\"},\"merchant\":{\"merchantCode\":\"4004353\",\"facilitatorCode\":\"\"},\"token\":{\"merchantBuyerId\":\"b7b7a3bd-fec4-4cae-90a4-c5069c880903\",\"cardToken\":\"\",\"alias\":\"\"},\"authentication\":{\"result\":\"\"},\"customFields\":[\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\"],\"miles\":{\"netMiles\":\"\",\"miles\":\"\"}}}",
+    "signature": "+zmzql9jd+NvA6BzCVBG08kAHHJ6MUobXCuJTNaFlps=",
+    "transactionId": "1732054710618"
+  }
+}

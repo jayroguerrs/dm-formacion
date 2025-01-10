@@ -1,0 +1,263 @@
+---
+import Layout from '@/layouts/root.layout.astro';
+import Breadcrumb from '@/components/breadcrumb.astro';
+import {
+  directus,
+  directusFileURL,
+  type Certifier,
+  type Provider,
+} from '@/utils/directus';
+import { readItems, readSingleton } from '@directus/sdk';
+import { format } from 'date-fns';
+import CourseCard from '@/components/course-card.astro';
+
+const { searchParams } = Astro.url;
+const term = searchParams.get('q');
+
+const internalsRequest = directus.request(
+  readItems('internalCourse', {
+    search: term || '',
+    sort: 'start',
+    fields: [
+      'id',
+      'title',
+      'type',
+      'image',
+      'start',
+      'duration',
+      'price',
+      'partnerPrice',
+      'generalAdmission',
+      'partner',
+      'showEnrollButton',
+      { certifier: ['*'] },
+    ],
+    filter: {
+      _and: [
+        {
+          status: {
+            _eq: 'published',
+          },
+        },
+        {
+          start: {
+            _gte: format(new Date(), 'dd-MM-yy'),
+          },
+        },
+      ],
+    },
+  })
+);
+
+const externalsRequest = directus.request(
+  readItems('externalCourse', {
+    search: term || '',
+    sort: 'start',
+    fields: [
+      'id',
+      'title',
+      'type',
+      'image',
+      'start',
+      'duration',
+      'price',
+      'partnerPrice',
+      'generalAdmission',
+      'partner',
+      'url',
+      { provider: ['*'] },
+    ],
+    filter: {
+      _and: [
+        {
+          status: {
+            _eq: 'published',
+          },
+        },
+        {
+          start: {
+            _gte: format(new Date(), 'dd-MM-yy'),
+          },
+        },
+      ],
+    },
+  })
+);
+
+const coursesConfigRequest = directus.request(readSingleton('coursesConfig'));
+
+const [internals, externals, coursesConfig] = await Promise.all([
+  internalsRequest,
+  externalsRequest,
+  coursesConfigRequest,
+]);
+
+const tabs = [
+  {
+    text: `Cursos Internos (${internals.length})`,
+    id: 'internals',
+  },
+  {
+    text: `Cursos Externos (${externals.length})`,
+    id: 'externals',
+  },
+];
+---
+
+<Layout>
+  <Breadcrumb
+    items={[
+      { text: 'Home', url: '/', icon: '/assets/home.icon.svg' },
+      { text: `Buscar: "${term || ''}"` },
+    ]}
+  />
+  <search-page>
+    {
+      !term && (
+        <div class="container mx-auto p-4">
+          <h1 class="font-bold text-2xl text-primary">
+            No hay suficientes criterios de búsqueda
+          </h1>
+        </div>
+      )
+    }
+
+    {
+      !!term && (
+        <div>
+          <div class="container mx-auto p-4">
+            <h1 class="font-bold text-2xl text-primary">
+              Resultados para "{term}"
+            </h1>
+          </div>
+          <div class="container mx-auto p-4 pb-0 mb-4 justify-center flex items-center gap-4 border-b border-dm-gray-2">
+            {tabs.map(item => (
+              <button
+                data-content-id={item.id}
+                type="button"
+                class:list={[
+                  'tab hover:text-primary text-center',
+                  'p-2 lg:p-4',
+                ]}
+              >
+                {item.text}
+              </button>
+            ))}
+          </div>
+
+          <div class="tab-content hidden container mx-auto p-4" id="internals">
+            <h2 class="font-bold text-xl text-secondary mb-4">
+              Cursos internos ({internals.length} resultados)
+            </h2>
+
+            {internals.length === 0 && (
+              <div class="flex flex-col items-center justify-center">
+                <p class="font-bold text-xl mb-4">
+                  No se encontraron resultados
+                </p>
+              </div>
+            )}
+            <div class="grid grid-cols-2 gap-2 md:gap-4 sm:grid-cols-3 lg:grid-cols-4">
+              {internals.map(course => (
+                <CourseCard
+                  id={course.id}
+                  title={course.title}
+                  image={course.image}
+                  start={course.start}
+                  duration={course.duration}
+                  certifier={(course.certifier as Certifier).name}
+                  certifierLogo={(course.certifier as Certifier).logo}
+                  price={course.generalAdmission ? course.price : undefined}
+                  partnerPrice={
+                    course.partner ? course.partnerPrice : undefined
+                  }
+                  category={course.type}
+                  type="internal"
+                  labelGeneralAdmission={coursesConfig.labelGeneralAdmission}
+                  labelPartner={coursesConfig.labelPartner}
+                  enrollButtonText={coursesConfig.enrollButtonTextCard}
+                  showEnrollButton={course.showEnrollButton}
+                />
+              ))}
+            </div>
+          </div>
+
+          <div class="tab-content hidden container mx-auto p-4" id="externals">
+            <h2 class="font-bold text-xl text-secondary mb-4">
+              Cursos externos ({externals.length} resultados)
+            </h2>
+            {externals.length === 0 && (
+              <div class="flex flex-col items-center justify-center">
+                <p class="font-bold text-xl mb-4">
+                  No se encontraron resultados
+                </p>
+              </div>
+            )}
+            <div class="grid grid-cols-2 gap-2 md:gap-4 sm:grid-cols-3 lg:grid-cols-4">
+              {externals.map(course => (
+                <CourseCard
+                  id={course.id}
+                  title={course.title}
+                  image={directusFileURL(course.image)}
+                  start={course.start}
+                  url={course.url}
+                  duration={course.duration}
+                  price={course.generalAdmission ? course.price : undefined}
+                  partnerPrice={
+                    course.partner ? course.partnerPrice : undefined
+                  }
+                  category={course.type}
+                  providerImage={directusFileURL(
+                    (course.provider as Provider).logo
+                  )}
+                  type="external"
+                  labelGeneralAdmission={coursesConfig.labelGeneralAdmission}
+                  labelPartner={coursesConfig.labelPartner}
+                />
+              ))}
+            </div>
+          </div>
+        </div>
+      )
+    }
+  </search-page>
+</Layout>
+
+<script>
+  class SearchPage extends HTMLElement {
+    constructor() {
+      super();
+
+      const tabs = document.querySelectorAll('.tab');
+      const activeTabClass = ['text-primary'];
+      const inactiveTabClass = ['text-dm-gray-2'];
+
+      tabs.forEach(tab => {
+        tab.addEventListener('click', e => {
+          console.log('CLICK!');
+          const button = e.target as HTMLButtonElement;
+          const id = button.getAttribute('data-content-id');
+          const tabContent = document.querySelectorAll('.tab-content');
+
+          tabContent.forEach(tab => tab.classList.add('hidden'));
+          tabs.forEach(otherTab => {
+            otherTab.classList.remove(...activeTabClass);
+            otherTab.classList.add(...inactiveTabClass);
+          });
+
+          tab.classList.add(...activeTabClass);
+          tab.classList.remove(...inactiveTabClass);
+
+          document.querySelector(`#${id}`)?.classList.remove('hidden');
+        });
+      });
+
+      tabs[0].classList.add(...activeTabClass);
+      tabs[0].classList.remove(...inactiveTabClass);
+      document
+        .querySelector(`#${tabs[0].getAttribute('data-content-id')}`)
+        ?.classList.remove('hidden');
+    }
+  }
+  customElements.define('search-page', SearchPage);
+</script>

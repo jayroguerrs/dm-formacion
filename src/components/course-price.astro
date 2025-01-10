@@ -1,0 +1,110 @@
+---
+import type { CoursesConfig, InternalCourse } from '@/utils/directus';
+import { Image } from 'astro:assets';
+
+interface Props {
+  course: InternalCourse;
+  textColor?: string;
+  coursesConfig?: CoursesConfig;
+}
+
+const { course, textColor = '', coursesConfig } = Astro.props;
+
+const percentagePartner = course.partnerPrice
+  ? ((course.partnerPrice / course.price) * 100 - 100).toFixed(2)
+  : '';
+const percentageContracted = course.contractedPrice
+  ? ((course.contractedPrice / course.price) * 100 - 100).toFixed(2)
+  : '';
+---
+
+<div class="flex gap-4 flex-col justify-center items-center rounded-lg p-4">
+  {
+    course.generalAdmission && (
+      <div class="flex flex-col items-center justify-center gap-2 w-full">
+        <div
+          class:list={[
+            'block text-[10px] uppercase text-center w-auto',
+            textColor,
+          ]}
+        >
+          {coursesConfig?.labelGeneralAdmission}
+        </div>
+        <div class:list={['block text-3xl text-center font-bold', textColor]}>
+          {course.price > 0 ? `S/ ${course.price}` : 'Gratuito'}
+        </div>
+      </div>
+    )
+  }
+
+  <div
+    class:list={[
+      'flex items-center w-full justify-center md:justify-around',
+      {
+        'flex-col md:flex-row gap-4 ': course.partner && course.contracted,
+      },
+    ]}
+  >
+    {
+      course.partner && (
+        <div class="flex flex-col items-center justify-center gap-2 shrink-0">
+          <div
+            class:list={['block text-[10px] uppercase text-center', textColor]}
+          >
+            {course.generalAdmission ? `${percentagePartner}% ` : ''}
+            {coursesConfig?.labelPartner}
+          </div>
+          <div class:list={[textColor, ' block text-3xl text-center']}>
+            {course.partnerPrice > 0 ? `S/ ${course.partnerPrice}` : 'Gratuito'}
+          </div>
+        </div>
+      )
+    }
+    {
+      course.contracted && (
+        <div class="flex flex-col items-center justify-center gap-2 shrink-0">
+          <div
+            class:list={['block text-[10px] uppercase text-center', textColor]}
+          >
+            {course.generalAdmission ? `${percentageContracted}%` : ''}
+            {coursesConfig?.labelContracted}
+          </div>
+          <div class:list={[textColor, ' block text-3xl text-center']}>
+            {course.contractedPrice > 0
+              ? `S/ ${course.contractedPrice}`
+              : 'Gratuito'}
+          </div>
+        </div>
+      )
+    }
+  </div>
+
+  {
+    course.generalAdmission && (
+      <div class="bg-white rounded-lg p-4 flex items-center gap-4 w-full">
+        <Image
+          src="/assets/hand-star.icon.svg"
+          alt="hand-star"
+          width={35}
+          height={35}
+        />
+        <div>
+          {course.partner && (
+            <div class="text-primary font-bold text-xs">
+              {coursesConfig?.labelDiscountPartner}: {percentagePartner}%
+            </div>
+          )}
+          {course.contracted && (
+            <div class="text-primary font-bold text-xs">
+              {coursesConfig?.labelDiscoundContracted}: {percentageContracted}%
+            </div>
+          )}
+
+          <div class="text-primary text-xs">
+            {coursesConfig?.labelPriceGeneralAdmission}: S/{course.price}
+          </div>
+        </div>
+      </div>
+    )
+  }
+</div>

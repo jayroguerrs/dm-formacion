@@ -1,0 +1,742 @@
+---
+import LandingLayout from '@/layouts/landing.layout.astro';
+import { WYSIWYG_CLASSES } from '@/utils/constants';
+import {
+  directus,
+  directusFileURL,
+  type Certifier,
+  type CourseCurriculum,
+  type InternalCourse_Professor,
+  type Professor,
+} from '@/utils/directus';
+import { readItems, readSingleton } from '@directus/sdk';
+import { Image } from 'astro:assets';
+import { format } from 'date-fns';
+import SEO from '@/components/seo.astro';
+import { convert } from 'html-to-text';
+import Accordion from '@/components/accordion.astro';
+import AccordionItem from '@/components/accordion-item.astro';
+import ProfessorLandingCarousel from '@/components/professor-landing-carousel.astro';
+import type {
+  ImageTextBlock,
+  InternalCourse,
+  InternalCourse_Review,
+  Review,
+} from '@/utils/directus';
+import CoursePrice from '@/components/course-price.astro';
+import DMDialog from '@/components/dm-dialog.astro';
+import Spinner from '@/components/spinner.astro';
+import Testimonies from '@/components/testimonies.astro';
+
+const { slug } = Astro.params;
+
+const courseRequest = await directus.request(
+  readItems('internalCourse', {
+    filter: {
+      _and: [{ slug: { _eq: slug } }, { status: { _eq: 'published' } }],
+    },
+    fields: [
+      '*',
+      {
+        curriculum: ['*'],
+        certifier: ['*'],
+        professors: ['*', { professor_id: ['*'] }],
+        comments: ['*', { review_id: ['*'] }],
+        reasons: ['*'],
+      },
+    ],
+  })
+);
+const testimonyRequest = directus.request(readSingleton('testimony'));
+const coursesConfigRequest = directus.request(readSingleton('coursesConfig'));
+
+const [courses, testimonyConfig, coursesConfig] = await Promise.all([
+  courseRequest,
+  testimonyRequest,
+  coursesConfigRequest,
+]);
+
+if (courses.length === 0) return Astro.redirect('/404');
+
+const course = courses[0];
+
+const startDate = new Date(course.start);
+
+const details = [
+  {
+    text: 'Créditos',
+    value: course.credits,
+    icon: '/assets/credits.icon.svg',
+    enabled:
+      !!course.credits && course.credits > 0 && course.showCreditsInLanding,
+  },
+  {
+    text: 'Duración',
+    value: course.duration,
+    icon: '/assets/clock.icon.svg',
+    enabled:
+      !!course.duration &&
+      course.duration.length > 0 &&
+      course.showDurationInLanding,
+  },
+  {
+    text: 'Modalidad',
+    value: course.modality,
+    icon: '/assets/modality.icon.svg',
+    enabled:
+      !!course.modality &&
+      course.modality.length > 0 &&
+      course.showModalityInLanding,
+  },
+  {
+    text: 'Inicio',
+    value: format(startDate, 'dd/MM/yyyy'),
+    icon: '/assets/calendar.icon.svg',
+    enabled: !!startDate && course.showStartDateInLanding,
+  },
+].filter(item => item.enabled);
+---
+
+<style>
+  .hero {
+    z-index: 5;
+  }
+  .elipse {
+    position: absolute;
+    width: 200vw;
+    height: 100vw;
+    border-radius: 50%;
+    background-color: #552685;
+    bottom: -25%;
+    left: -50vw;
+    z-index: 1;
+  }
+
+  .curriculum {
+    background-image: url('/assets/img/bg-externals.svg');
+    background-repeat: no-repeat;
+    background-size: cover;
+  }
+
+  .bg-professors {
+    background-image: url('/assets/img/bg-green.svg');
+    background-repeat: no-repeat;
+    background-size: cover;
+  }
+</style>
+<style is:global>
+  .accordion__header {
+    background-color: #552685;
+  }
+
+  .accordion__panel {
+    background-color: white;
+  }
+</style>
+
+<SEO
+  title={course.title}
+  description={convert(course.shortDescription)}
+  image={course.image}
+  type="article"
+/>
+
+<LandingLayout>
+  <div class="relative overflow-x-hidden">
+    <div class="relative">
+      <div
+        class="bg-gradient-to-b from-[#903F97] to-[#552685] bg-red-500 hero absolute top-0 left-0 w-full h-full"
+      >
+      </div>
+      <!-- White circle -->
+      <div
+        class="w-[458px] h-[458px] bg-white/10 rounded-full absolute -top-[100px] -left-[195px] z-[5]"
+      >
+      </div>
+      <!-- Yellow circle -->
+      <div
+        class="w-[45px] h-[45px] bg-[#D6E040] rounded-full absolute top-[80px] -left-[22px] z-[5]"
+      >
+      </div>
+      <!-- Dots -->
+      <Image
+        src="/assets/img/landing-dots.svg"
+        width={265}
+        height={241}
+        alt="dots"
+        class="absolute bottom-0 right-0 z-[5]"
+      />
+      <div class="relative z-10">
+        <header class="container mx-auto p-4">
+          <a href="/">
+            <Image
+              src="/assets/logo-white.svg"
+              alt="DM Formación"
+              width={223}
+              height={56}
+              class="block w-[127px] h-auto lg-[223px]"
+            />
+          </a>
+        </header>
+        <div
+          class="container mx-auto p-4 grid grid-cols-1 gap-4 md:grid-cols-2 lg:max-w-4xl"
+        >
+          <div class="grid grid-cols-1 gap-4 lg:grid-rows-[auto_1fr_auto]">
+            <h1 class="font-bold text-2xl text-white">
+              {course.title}
+            </h1>
+            {
+              course.showShortDescriptionInLanding ? (
+                <div
+                  class:list={[WYSIWYG_CLASSES, 'text-white text-sm']}
+                  set:html={course.shortDescription}
+                />
+              ) : (
+                <div />
+              )
+            }
+            {
+              course.showCertifierInLanding ? (
+                <div class="grid grid-cols-2 gap-4 items-center bg-white p-4 rounded-lg">
+                  <div class="text-secondary font-semibold">
+                    {(course.certifier as Certifier).detailText ||
+                      `Certificado profesional por ${(course.certifier as Certifier).name}`}
+                  </div>
+                  <div class="flex justify-center items-center">
+                    <Image
+                      src={directusFileURL(
+                        (course.certifier as Certifier).logo
+                      )}
+                      alt={(course.certifier as Certifier).name}
+                      width={223}
+                      height={56}
+                      class="block w-[127px] h-auto lg-[223px]"
+                    />
+                  </div>
+                </div>
+              ) : (
+                <div />
+              )
+            }
+            {
+              details.length > 0 ? (
+                <div class="flex gap-4 justify-between items-center rounded-lg border border-white p-4">
+                  {details.map(item => (
+                    <div class="flex flex-col items-center justify-center gap-2">
+                      <div class="w-[25px] h-[25px] flex items-center justify-center">
+                        <Image
+                          src={item.icon}
+                          alt={item.text}
+                          width={25}
+                          height={25}
+                        />
+                      </div>
+                      <div>
+                        <div class="text-white text-[10px] uppercase text-center">
+                          {item.text}
+                        </div>
+                        <div class="text-white text-xs uppercase text-center font-bold">
+                          {item.value}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div />
+              )
+            }
+          </div>
+          <div class="grid grid-cols-1 gap-4">
+            <div
+              class="flex gap-4 bg-primary flex-col justify-center items-center rounded-lg p-4"
+            >
+              <CoursePrice
+                course={course as InternalCourse}
+                textColor="text-white"
+                coursesConfig={coursesConfig}
+              />
+              <div class="flex items-center justify-center gap-4 w-full px-6">
+                <button
+                  data-action="more-info"
+                  data-course-id={course.id}
+                  type="button"
+                  class="text-white border border-white rounded-md px-4 py-2 hover:bg-white hover:text-primary"
+                >
+                  Quiero información
+                </button>
+
+                {
+                  course.showEnrollButton && (
+                    <button
+                      data-action="inscription"
+                      data-course-id={course.id}
+                      data-course-name={course.title}
+                      class="bg-white text-primary px-4 py-2 rounded-md font-bold border border-white"
+                    >
+                      {coursesConfig.enrollButtonTextLanding}
+                    </button>
+                  )
+                }
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="w-full flex justify-center py-8">
+          <svg
+            width="44"
+            height="41"
+            viewBox="0 0 44 41"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              fill-rule="evenodd"
+              clip-rule="evenodd"
+              d="M31.6328 9.30151L22.001 18.6032L12.4249 9.35721L2.84897 0.1112L1.42437 1.48698L0 2.86254L10.9437 13.4313L21.8875 24L32.9439 13.3207L44 2.64169L42.6322 1.32073L41.2646 0L31.6328 9.30151Z"
+              fill="white"></path>
+            <path
+              fill-rule="evenodd"
+              clip-rule="evenodd"
+              d="M31.6328 25.6891L22.001 35.3784L12.4249 25.7471L2.84897 16.1158L1.42437 17.5489L0 18.9818L10.9437 29.9909L21.8875 41L32.9439 29.8758L44 18.7518L42.6322 17.3758L41.2646 16L31.6328 25.6891Z"
+              fill="white"></path>
+          </svg>
+        </div>
+      </div>
+      <div class="elipse"></div>
+    </div>
+
+    <div
+      class:list={[
+        'container mx-auto p-4 py-12 gap-4 grid relative z-10 lg:max-w-4xl',
+        ,
+        {
+          'grid-cols-2':
+            course.showLongDescriptionInLanding && course.showTargetInLanding,
+          'grid-cols-1':
+            [
+              course.showLongDescriptionInLanding,
+              !course.showTargetInLanding,
+            ].filter(item => item).length > 1,
+        },
+      ]}
+    >
+      {
+        course.showLongDescriptionInLanding && (
+          <div class="bg-white rounded-lg p-4 pt-0 lg:px-8 lg:pb-8 flex flex-col items-center gap-4 w-full shadow-dm">
+            <div class="bg-[#C77EB5] rounded-full w-[91px] h-[91px] flex items-center justify-center -mt-[25px]">
+              <Image
+                src="/assets/about.icon.svg"
+                alt="Acerca del curso"
+                width={55}
+                height={43}
+              />
+            </div>
+            <h2 class="font-bold text-base">Acerca del curso</h2>
+            <div
+              class:list={[WYSIWYG_CLASSES, 'text-[10px] sm:text-sm']}
+              set:html={course.longDescription}
+            />
+          </div>
+        )
+      }
+      {
+        course.showTargetInLanding && (
+          <div class="bg-white rounded-lg p-4 pt-0 lg:px-8 lg:pb-8 flex flex-col items-center gap-4 w-full shadow-dm">
+            <div class="bg-[#C77EB5] rounded-full w-[91px] h-[91px] flex items-center justify-center -mt-[25px]">
+              <Image
+                src="/assets/target.icon.svg"
+                alt="A quiénes está dirigido"
+                width={55}
+                height={43}
+              />
+            </div>
+            <h2 class="font-bold text-base">A quiénes está dirigido</h2>
+            <div
+              class:list={[WYSIWYG_CLASSES, 'text-[10px] sm:text-sm']}
+              set:html={course.target}
+            />
+          </div>
+        )
+      }
+    </div>
+
+    {
+      course.showCurricullumInLanding && (
+        <div class="curriculum py-12">
+          <div class="container mx-auto p-4 lg:max-w-4xl flex flex-col gap-4 lg:gap-12">
+            <h2 class="font-bold text-4xl text-primary text-center">
+              Descubre el Plan de estudios
+            </h2>
+            <Accordion>
+              {((course.curriculum || []) as CourseCurriculum[]).map(item => (
+                <AccordionItem header={item.title}>
+                  <div
+                    set:html={item.description}
+                    class:list={[WYSIWYG_CLASSES]}
+                  />
+                </AccordionItem>
+              ))}
+            </Accordion>
+          </div>
+        </div>
+      )
+    }
+
+    {
+      course.professors &&
+        course.professors.length > 0 &&
+        course.showProfessorsInLanding && (
+          <div class="relative py-12">
+            <div class="relative">
+              <ProfessorLandingCarousel
+                professors={(
+                  course.professors as InternalCourse_Professor[]
+                ).map(({ professor_id }) => professor_id as Professor)}
+              />
+            </div>
+            <div class="absolute h-[70%] w-full left-0 bottom-0 bg-professors" />
+          </div>
+        )
+    }
+
+    {
+      course.comments &&
+        course.comments.length > 0 &&
+        course.showReviewsInLanding && (
+          <Testimonies
+            config={testimonyConfig}
+            testimonies={(course.comments as InternalCourse_Review[]).map(
+              ({ review_id }) => {
+                const review = review_id as Review;
+                return {
+                  author: review.studentName,
+                  body: review.body,
+                  image: directusFileURL(review.studentImage),
+                  detail: review.studentDetail,
+                };
+              }
+            )}
+          />
+        )
+    }
+    {
+      course.showCertifierInLanding && (
+        <div class="bg-[#552685] relative">
+          <span class="rounded-full bg-white/10 w-[50px] h-[50px] absolute left-[-25px] top-[calc(50%_-_25px)]" />
+          <span class="rounded-full bg-white/10 w-[22px] h-[22px] absolute left-[calc(50%_-_17px)] bottom-4" />
+          <div class="container mx-auto p-4 flex flex-col gap-4 lg:max-w-3xl lg:grid lg:grid-cols-[1fr_auto] lg-items-center relative">
+            <div class="lg:flex lg:flex-col lg:justify-center lg:gap-4">
+              <div class="text-white lg:text-xl">Al finalizar obtendrás</div>
+              <div class="text-white font-bold text-2xl lg:text-3xl">
+                {(course.certifier as Certifier).detailText ||
+                  `Certificado profesional por ${(course.certifier as Certifier).name}`}
+              </div>
+            </div>
+            <div class="relative flex justify-center items-center">
+              <div class="bg-primary rounded-full w-[103px] h-[103px] flex items-center justify-center p-4 absolute top-0 right-1/2 -translate-x-1/2">
+                <Image
+                  src="/assets/certificate.icon.svg"
+                  alt="Certificate"
+                  width={57}
+                  height={49}
+                />
+              </div>
+              <div class="bg-white rounded-full w-[213px] h-[213px] flex items-center justify-center p-8 mt-4">
+                <Image
+                  src={directusFileURL((course.certifier as Certifier).logo)}
+                  alt={(course.certifier as Certifier).name}
+                  width={213}
+                  height={213}
+                  class="block w-full h-auto"
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+      )
+    }
+    {
+      course.reasons &&
+        course.reasons.length > 0 &&
+        course.showWhyWithUsInLanding && (
+          <div class="container mx-auto p-4">
+            <div class="grid gap-4 lg:grid-cols-2 lg:items-center xl:grid-cols-[760px_1fr]">
+              <div>
+                <Image
+                  src={
+                    course.reasonsImage
+                      ? directusFileURL(course.reasonsImage)
+                      : '/assets/img/why.png'
+                  }
+                  alt="¿Por qué tomar este curso con nosotros?"
+                  width={760}
+                  height={556}
+                  class="w-full h-auto object-cover"
+                />
+              </div>
+
+              <div class="grid gap-4 xl:items-center xl:gap-16">
+                <h2 class="text-primary text-3xl">
+                  ¿Por qué tomar este
+                  <br />
+                  <strong>curso con nosotros?</strong>
+                </h2>
+                <div class="grid gap-4">
+                  {(course.reasons as ImageTextBlock[]).map(item => (
+                    <div class="reason flex justify-start items-center gap-4">
+                      <Image
+                        src={directusFileURL(item.image)}
+                        alt=""
+                        width={50}
+                        height={50}
+                        loading="lazy"
+                      />
+                      <div
+                        class="flex flex-col gap-2 lg:gap-0 text-sm lg:text-base"
+                        set:html={item.text}
+                      />
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        )
+    }
+
+    <div class="bg-gradient-to-r from-[#552685] to-[#903F97] relative">
+      <span
+        class="rounded-full bg-white/10 w-[50px] h-[50px] absolute left-[-25px] top-[calc(50%_-_25px)]"
+      ></span>
+      <span
+        class="rounded-full bg-white/10 w-[22px] h-[22px] absolute left-[calc(50%_-_17px)] bottom-4"
+      ></span>
+      <div
+        class="container mx-auto px-4 py-8 grid grid-cols-1 gap-4 md:grid-cols-2 lg:gap-12 items-center relative"
+      >
+        <h2 class="font-bold text-3xl text-white text-center md:text-left">
+          {course.title}
+        </h2>
+        <div class="flex gap-4 flex-col items-center">
+          <CoursePrice
+            course={course as InternalCourse}
+            textColor="text-white"
+            coursesConfig={coursesConfig}
+          />
+          <div class="flex items-center justify-center gap-4">
+            <button
+              data-action="more-info"
+              data-course-id={course.id}
+              type="button"
+              class="text-white border border-white rounded-md px-4 py-2 hover:bg-white hover:text-primary"
+            >
+              Quiero información
+            </button>
+
+            {
+              course.showEnrollButton && (
+                <button
+                  data-action="inscription"
+                  data-course-id={course.id}
+                  data-course-name={course.title}
+                  class="bg-white text-primary px-4 py-2 rounded-md font-bold border border-white"
+                >
+                  {coursesConfig.enrollButtonTextLanding}
+                </button>
+              )
+            }
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</LandingLayout>
+<DMDialog id="moreInfo" class="lg:w-[636px]">
+  <div class="flex flex-col gap-4">
+    <p class="text-center text-xs text-dm-gray-4">Quiero información</p>
+    <h1 class="text-center font-bold text-secondary text-xl">
+      Déjanos tus datos para<br />comunicarnos configo
+    </h1>
+    <form>
+      <div class="flex flex-col gap-4">
+        <input type="hidden" name="course" value="" />
+        <div class="grid grid-cols-1 gap-4 lg:grid-cols-2">
+          <div>
+            <input
+              name="firstName"
+              placeholder="Nombres"
+              class="w-full text-dm-gray-6 placeholder:text-dm-gray-6 bg-dm-gray-5/80 rounded-lg text-lg p-4"
+            />
+            <span class="text-xs text-red-500 error-message"></span>
+          </div>
+          <div>
+            <input
+              name="lastName"
+              placeholder="Apellidos"
+              class="w-full text-dm-gray-6 placeholder:text-dm-gray-6 bg-dm-gray-5/80 rounded-lg text-lg p-4"
+            />
+            <span class="text-xs text-red-500 error-message"></span>
+          </div>
+          <div>
+            <input
+              name="email"
+              placeholder="Correo electrónico"
+              class="w-full text-dm-gray-6 placeholder:text-dm-gray-6 bg-dm-gray-5/80 rounded-lg text-lg p-4"
+            />
+            <span class="text-xs text-red-500 error-message"></span>
+          </div>
+          <div>
+            <input
+              name="phone"
+              placeholder="Teléfono"
+              class="w-full text-dm-gray-6 placeholder:text-dm-gray-6 bg-dm-gray-5/80 rounded-lg text-lg p-4"
+            />
+            <span class="text-xs text-red-500 error-message"></span>
+          </div>
+          <div>
+            <select
+              name="documentType"
+              class="w-full text-dm-gray-6 bg-dm-gray-5/80 rounded-lg text-lg p-4"
+            >
+              <option value="DNI">DNI</option>
+              <option value="CE">CE</option>
+              <option value="Pasaporte">Pasaporte</option>
+            </select>
+            <span class="text-xs text-red-500 error-message"></span>
+          </div>
+          <div>
+            <input
+              name="document"
+              placeholder="Nro de documentos"
+              class="w-full text-dm-gray-6 placeholder:text-dm-gray-6 bg-dm-gray-5/80 rounded-lg text-lg p-4"
+            />
+            <span class="text-xs text-red-500 error-message"></span>
+          </div>
+        </div>
+        <div class="flex flex-col">
+          <label class="flex items-center gap-4">
+            <input type="checkbox" name="authorization" />
+            <span class="text-sm text-dm-gray-7">
+              Autorizo el tratamiento de mis datos personales para la
+              participación del curso, conforme al siguiente <a
+                href="https://www.derrama.org.pe/politicas-de-proteccion-de-datos-personales/"
+                target="_blank">enlace</a
+              >. Sin mi autorización, no podré recibir la información.
+            </span>
+          </label>
+          <span class="text-xs text-red-500 error-message"></span>
+        </div>
+        <div class="flex flex-col">
+          <label class="flex items-center gap-4">
+            <input type="checkbox" name="authorizationGetInfo" />
+            <span class="text-sm text-dm-gray-7">
+              Opcionalmente, autorizo a DM Formación (Unidad de Negocio de
+              Derrama Magisterial) a contactarme y enviarme información de
+              programas de educación y/o servicios que ofrece, eventos y
+              publicidad en general
+            </span>
+          </label>
+          <span class="text-xs text-red-500 error-message"></span>
+        </div>
+        <div class="flex gap-4 justify-center">
+          <button
+            type="submit"
+            class="bg-secondary text-white hover:bg-primary px-4 py-2 rounded-lg text-sm"
+          >
+            Enviar información
+          </button>
+          <Spinner class="hidden" />
+        </div>
+      </div>
+    </form>
+  </div>
+</DMDialog>
+<DMDialog id="moreInfoSuccess">
+  <div class="p-4 flex justify-center items-center flex-col gap-4">
+    <p class="text-center">
+      Muchas gracias<br />
+      Hemos recibido tus datos<br />
+      Nos comunicaremos contigo lo antes posible
+    </p>
+  </div>
+</DMDialog>
+
+<script>
+  import { isInputError } from 'astro:actions';
+  import { actions } from 'astro:actions';
+
+  const buttons = document.querySelectorAll('button[data-action="more-info"]');
+  const dialog: HTMLDialogElement | null = document.querySelector('#moreInfo');
+  const form: HTMLFormElement | null = dialog?.querySelector('form') || null;
+
+  buttons.forEach(button =>
+    button.addEventListener('click', e => {
+      // const courseId = (e.currentTarget as HTMLButtonElement).getAttribute(
+      //   'data-course-id'
+      // );
+
+      const courseField: HTMLInputElement = dialog?.querySelector(
+        'input[name="course"]'
+      )!;
+      courseField.value =
+        (e.currentTarget as HTMLButtonElement).getAttribute('data-course-id') ||
+        '';
+
+      dialog?.showModal();
+    })
+  );
+
+  dialog?.addEventListener('close', () => {
+    form?.reset();
+    clearErrors(dialog!);
+    setLoading(dialog!, false);
+  });
+
+  form?.addEventListener('submit', async (e: SubmitEvent) => {
+    e.preventDefault();
+    setLoading(dialog!, true);
+    const formData = new FormData(e.currentTarget as HTMLFormElement);
+    const { data, error } = await actions.moreInfo(formData);
+    clearErrors(dialog!);
+    setLoading(dialog!, false);
+
+    if (error) {
+      if (isInputError(error)) {
+        Object.entries(error.fields).forEach(([name, messages]) => {
+          const errorField =
+            dialog
+              ?.querySelector(`[name="${name}"]`)
+              ?.parentElement?.querySelector('.error-message') ||
+            dialog
+              ?.querySelector(`[name="${name}"]`)
+              ?.parentElement?.parentElement?.querySelector('.error-message');
+          if (errorField && messages && messages?.length > 0)
+            errorField.innerHTML = messages[0];
+        });
+      } else {
+        alert('Ocurrió un error, por favor intente nuevamente en un momento');
+      }
+    }
+
+    if (data?.success) {
+      dialog?.close();
+      (
+        document.querySelector('#moreInfoSuccess') as HTMLDialogElement
+      )?.showModal();
+    }
+  });
+
+  const clearErrors = (dialog: HTMLDialogElement) => {
+    dialog
+      .querySelectorAll('.error-message')
+      .forEach(errorField => (errorField.innerHTML = ''));
+  };
+
+  const setLoading = (dialog: HTMLDialogElement, loading: boolean) => {
+    dialog.querySelector('.spinner')?.classList.toggle('hidden', !loading);
+    dialog
+      .querySelector('button[type="submit"]')
+      ?.classList.toggle('hidden', loading);
+  };
+</script>

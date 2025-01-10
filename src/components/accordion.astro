@@ -1,0 +1,138 @@
+---
+import type { AccordionItemProps } from './accordion-item.astro';
+
+interface Props {
+  children: AccordionItemProps | AccordionItemProps[];
+}
+---
+
+<div class="accordion">
+  <ul class="accordion__wrapper list-none p-0">
+    <slot />
+  </ul>
+</div>
+
+<script type="module" is:inline>
+  // variables
+  const accordionItems = [...document.querySelectorAll('.accordion__item')];
+
+  // functions
+  const getPanelHeight = accordionItem => {
+    const accordionInner = accordionItem.querySelector('.panel__inner');
+    return accordionInner.getBoundingClientRect().height;
+  };
+
+  const openAccordionItem = accordionItem => {
+    const accordionItemHeader =
+      accordionItem.querySelector('.accordion__header');
+    const accordionToggleIndicator = accordionItem.querySelector(
+      '.header__toggle-indicator'
+    );
+    const accordionPanel = accordionItem.querySelector('.accordion__panel');
+
+    accordionPanel.style.height = `${getPanelHeight(accordionItem)}px`;
+
+    accordionItem.classList.add('is-active');
+    accordionItemHeader.setAttribute('aria-expanded', true);
+    accordionToggleIndicator.innerHTML = `<svg width="16" height="9" viewBox="0 0 16 9" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M2.4519 8.60025L8.00716 3.29727L13.5624 8.60025C13.8299 8.85617 14.1931 9 14.5718 9C14.9505 9 15.3137 8.85617 15.5812 8.60025C16.1396 8.06722 16.1396 7.20617 15.5812 6.67314L9.0094 0.399772C8.45101 -0.133259 7.54899 -0.133259 6.99061 0.399772L0.418793 6.67313C-0.139597 7.20616 -0.139597 8.06721 0.418793 8.60025C0.977181 9.11961 1.89351 9.13328 2.4519 8.60025Z" fill="white"/></svg>`;
+  };
+
+  const closeAccordionItem = accordionItem => {
+    const accordionItemHeader =
+      accordionItem.querySelector('.accordion__header');
+    const accordionToggleIndicator = accordionItem.querySelector(
+      '.header__toggle-indicator'
+    );
+    const accordionPanel = accordionItem.querySelector('.accordion__panel');
+
+    accordionItem.classList.remove('is-active');
+    accordionPanel.style.height = 0;
+    accordionItemHeader.focus();
+    accordionItemHeader.setAttribute('aria-expanded', false);
+    accordionToggleIndicator.innerHTML = `<svg width="16" height="9" viewBox="0 0 16 9" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M13.5481 0.399753L7.99284 5.70273L2.43758 0.399753C2.17008 0.143827 1.80692 0 1.42819 0C1.04946 0 0.686291 0.143827 0.418792 0.399753C-0.139597 0.932784 -0.139597 1.79383 0.418792 2.32686L6.9906 8.60023C7.54899 9.13326 8.45101 9.13326 9.0094 8.60023L15.5812 2.32686C16.1396 1.79383 16.1396 0.932784 15.5812 0.399753C15.0228 -0.11961 14.1065 -0.133277 13.5481 0.399753Z" fill="white"/></svg>`;
+  };
+
+  const isAccordionOpen = accordionItem => {
+    return accordionItem.classList.contains('is-active');
+  };
+
+  function toggleAccordionItem() {
+    const accordionItem = event.target.closest('.accordion__item');
+    if (!accordionItem || event.target.closest('.accordion__panel')) return;
+
+    isAccordionOpen(accordionItem)
+      ? closeAccordionItem(accordionItem)
+      : openAccordionItem(accordionItem);
+  }
+
+  function recalculateHeight() {
+    const toggledAccordionItems = accordionItems.filter(element =>
+      element.classList.contains('is-active')
+    );
+
+    toggledAccordionItems.forEach(toggledAccordionItem => {
+      const accordionPanel =
+        toggledAccordionItem.querySelector('.accordion__panel');
+      accordionPanel.style.height = `${getPanelHeight(toggledAccordionItem)}px`;
+    });
+  }
+
+  // execution
+  accordionItems.forEach((item, index) => {
+    const accordionItemHeader = item.querySelector('.accordion__header');
+    const accordionItemPanel = item.querySelector('.accordion__panel');
+
+    accordionItemHeader.setAttribute('id', `accordion-item${index + 1}`);
+    accordionItemPanel.setAttribute('id', `item${index + 1}`);
+
+    accordionItemHeader.setAttribute('aria-controls', `item${index + 1}`);
+    accordionItemPanel.setAttribute(
+      'aria-labelledby',
+      `accordion-item${index + 1}`
+    );
+  });
+
+  document.addEventListener('keydown', event => {
+    const accordionItem = event.target.closest('.accordion__item');
+
+    if (event.key !== 'Escape') return;
+    if (!accordionItem) return;
+
+    if (isAccordionOpen(accordionItem)) {
+      closeAccordionItem(accordionItem);
+    }
+  });
+
+  document.addEventListener('keydown', event => {
+    if (!event.target.closest('.accordion__header')) return;
+
+    const accordionWrapper = event.target.closest('.accordion__wrapper');
+    const accordionItem = event.target.closest('.accordion__item');
+    const accordionItems = [
+      ...accordionWrapper.querySelectorAll('.accordion__item'),
+    ];
+    const index = accordionItems.findIndex(
+      element => element === accordionItem
+    );
+
+    const { key } = event;
+
+    let targetItem;
+
+    if (key === 'ArrowDown') {
+      targetItem = accordionItems[index + 1];
+    }
+
+    if (key === 'ArrowUp') {
+      targetItem = accordionItems[index - 1];
+    }
+
+    if (targetItem) {
+      event.preventDefault();
+      targetItem.querySelector('.accordion__header').focus();
+    }
+  });
+
+  window.toggleAccordionItem = toggleAccordionItem;
+  window.onresize = recalculateHeight;
+</script>

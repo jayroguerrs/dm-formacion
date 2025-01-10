@@ -1,0 +1,100 @@
+---
+import { Image } from 'astro:assets';
+import EventBannerSlide from './event-banner-slide.astro';
+import 'swiper/css';
+
+interface Props {
+  id: string;
+  slides: {
+    id: string;
+    title: string;
+    image: string;
+    start: string;
+    end: string;
+    url: string;
+  }[];
+}
+const { id, slides } = Astro.props;
+---
+
+<style is:global>
+  .event-banner {
+    & .controls {
+      position: absolute;
+      left: 0;
+      width: 100%;
+      right: 0;
+      z-index: 10;
+      display: flex;
+      justify-content: space-between;
+      top: 50%;
+      margin-top: -15px;
+
+      & > button:disabled {
+        opacity: 0;
+      }
+    }
+  }
+</style>
+
+<event-banner data-id={id}>
+  <div id={id} class="event-banner container mx-auto p-4 relative">
+    <div class="controls px-2 lg:px-4">
+      <button class="button-prev" type="button">
+        <Image
+          src="/assets/img/banner-prev.svg"
+          alt="prev"
+          width="30"
+          height="30"
+          loading="eager"
+        />
+      </button>
+      <button class="button-next" type="button">
+        <Image
+          src="/assets/img/banner-next.svg"
+          alt="next"
+          width="30"
+          height="30"
+          loading="eager"
+        />
+      </button>
+    </div>
+    <div
+      class="max-w-[calc(100vw_-_3rem)] sm:w-full overflow-hidden h-full lg:overflow-visible"
+    >
+      <div class="swiper">
+        <div class="swiper-wrapper">
+          {
+            slides.map(slide => (
+              <div class="swiper-slide h-auto">
+                <EventBannerSlide {...slide} />
+              </div>
+            ))
+          }
+        </div>
+      </div>
+    </div>
+  </div>
+</event-banner>
+
+<script type="module" is:inline>
+  import Swiper from 'https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.mjs';
+
+  class EventBanner extends HTMLElement {
+    constructor() {
+      super();
+
+      const id = this.dataset.id;
+      new Swiper(`#${id} .swiper`, {
+        // speed: 500,
+        navigation: {
+          nextEl: `#${id} .button-next`,
+          prevEl: `#${id} .button-prev`,
+        },
+      });
+    }
+  }
+
+  customElements.get('event-banner') ||
+    customElements.define('event-banner', EventBanner);
+</script>

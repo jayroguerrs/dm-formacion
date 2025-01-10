@@ -1,0 +1,488 @@
+---
+import AccordionItem from '@/components/accordion-item.astro';
+import Accordion from '@/components/accordion.astro';
+import Breadcrumb from '@/components/breadcrumb.astro';
+import Layout from '@/layouts/root.layout.astro';
+import {
+  directus,
+  directusFileURL,
+  type Certifier,
+  type CourseCurriculum,
+  type InternalCourse_Professor,
+  type InternalCourse_Review,
+  type Professor,
+  type Review,
+} from '@/utils/directus';
+import { Image } from 'astro:assets';
+import { readItems, readSingleton } from '@directus/sdk';
+import { format } from 'date-fns';
+import { WYSIWYG_CLASSES } from '@/utils/constants';
+import YoutubeVideo from '@/components/youtube-video.astro';
+import Partners from '@/components/partners.astro';
+import SEO from '@/components/seo.astro';
+import { convert } from 'html-to-text';
+import ProfessorCard from '@/components/professor-card.astro';
+import CommentCard from '@/components/comment-card.astro';
+
+const { id = '' } = Astro.params;
+const courseRequest = directus.request(
+  readItems('internalCourse', {
+    filter: {
+      id: { _eq: id },
+    },
+    fields: [
+      '*',
+      {
+        curriculum: ['*'],
+        certifier: ['*'],
+        professors: ['*', { professor_id: ['*'] }],
+        comments: ['*', { review_id: ['*'] }],
+      },
+    ],
+  })
+);
+const benefitsRequest = directus.request(readSingleton('benefitsBanner'));
+const coursesConfigRequest = await directus.request(
+  readSingleton('coursesConfig', { fields: ['*'] })
+);
+// @ts-ignore
+const [[course], benefits, coursesConfig] = await Promise.all([
+  courseRequest,
+  benefitsRequest,
+  coursesConfigRequest,
+]);
+if (!course) return Astro.redirect('/404');
+
+const startDate = new Date(course.start);
+const percentagePartner = course.partnerPrice
+  ? ((course.partnerPrice / course.price) * 100 - 100).toFixed(2)
+  : '';
+const percentageContracted = course.contractedPrice
+  ? ((course.contractedPrice / course.price) * 100 - 100).toFixed(2)
+  : '';
+
+const detailTable = [
+  {
+    title: 'Fecha de inicio',
+    value: format(startDate, 'dd/MM/yyyy'),
+    enabled: course.showStartDateInDetail,
+  },
+  {
+    title: 'Hora',
+    value: format(startDate, 'hh:mm a'),
+    enabled: course.showStartTimeInDetail,
+  },
+  {
+    title: 'Duración',
+    value: course.duration,
+    enabled: course.showDurationInDetail && !!course.duration,
+  },
+  {
+    title: 'Sesiones',
+    value: course.sessions,
+    enabled: !!course.sessions && course.showSessionsInDetail,
+  },
+  {
+    title: 'Modalidad',
+    value: course.modality,
+    enabled: course.showModalityInDetail,
+  },
+  {
+    title: 'Días de sesión',
+    value: course.classDays,
+    enabled: !!course.classDays && course.showClassDaysInDetail,
+  },
+].filter(item => item.enabled);
+
+const tabs = [
+  {
+    text: 'Malla Curricular',
+    id: 'malla-curricular',
+    enabled:
+      course.curriculum &&
+      course.curriculum.length > 0 &&
+      course.showCurriculumInDetail,
+  },
+  {
+    text: 'Docentes',
+    id: 'docentes',
+    enabled:
+      course.professors &&
+      course.professors.length > 0 &&
+      course.showProfessorsInDetail,
+  },
+  {
+    text: 'Comentarios',
+    id: 'comentarios',
+    enabled:
+      course.comments &&
+      course.comments.length > 0 &&
+      course.showCommentsInDetail,
+  },
+].filter(tab => tab.enabled);
+---
+
+<SEO
+  title={course.title}
+  description={convert(course.shortDescription)}
+  image={course.image}
+  type="article"
+/>
+
+<style>
+  .course-content {
+    display: grid;
+    grid-template-areas:
+      'title'
+      'picture'
+      'sidebar'
+      'about'
+      'certifier'
+      'tabs';
+
+    @media (min-width: 1024px) {
+      grid-template-columns: 1fr 400px;
+      grid-template-areas:
+        'title title'
+        'picture sidebar'
+        'about sidebar'
+        'certifier sidebar'
+        'tabs sidebar';
+    }
+  }
+</style>
+<style is:global>
+  #malla-curricular {
+    & .accordion__header {
+      background-color: #552685;
+    }
+    & .accordion__panel {
+      background-color: #f7f7fc;
+    }
+  }
+</style>
+
+<Layout>
+  <Breadcrumb
+    items={[
+      { text: 'Home', url: '/', icon: '/assets/home.icon.svg' },
+      { text: 'Cursos Internos', url: '/cursos/internos' },
+      { text: 'Detalle del curso' },
+    ]}
+  />
+  <div class="relative overflow-hidden">
+    <Image
+      src="/assets/img/how-works-bg.svg"
+      alt="course-bg"
+      width={224}
+      height={224}
+      class="absolute w-[224px] h-[224px] left-[-38px] top-[406px]"
+    />
+
+    <Image
+      src="/assets/img/how-works-bg.svg"
+      alt="course-bg"
+      width={224}
+      height={224}
+      class="absolute w-[224px] h-[224px] right-[-38px] top-[50%] rotate-180"
+    />
+    <span
+      class="rounded-full bg-[#9EA5AC] w-[150px] h-[150px] absolute right-[-75px] top-[calc(50%-200px)] opacity-[0.1]"
+    ></span>
+    <span
+      class="rounded-full bg-[#9EA5AC] w-[225px] h-[225px] absolute right-[150px] bottom-[300px] opacity-[0.1]"
+    ></span>
+    <span
+      class="rounded-full bg-[#9EA5AC] w-[145px] h-[145px] absolute left-[70px] bottom-[350px] opacity-[0.1]"
+    ></span>
+    <div class="container mx-auto p-4 lg:py-12 relative">
+      <div class="course-content gap-4 lg:gap-12">
+        <h1
+          class="text-secondary font-bold text-sm lg:text-3xl"
+          style="grid-area: title"
+        >
+          {course.title}
+        </h1>
+
+        {
+          course.video && course.showVideoInDetail ? (
+            <div
+              class="aspect-video overflow-hidden"
+              style="grid-area: picture"
+            >
+              <YoutubeVideo url={course.video} title={course.title} />
+            </div>
+          ) : course.image && course.showImageInDetail ? (
+            <div
+              class="aspect-video overflow-hidden"
+              style="grid-area: picture"
+            >
+              <Image
+                src={directusFileURL(course.image)}
+                alt="Banner curso"
+                width={770}
+                height={434}
+                loading="eager"
+                class="object-cover w-full h-auto"
+              />
+            </div>
+          ) : null
+        }
+
+        <aside style="grid-area: sidebar">
+          <div class="shadow-dm p-4 rounded-md flex flex-col gap-4 bg-white">
+            <div
+              class:list={[
+                'flex items-center gap-4 w-full justify-center flex-col md:flex-row',
+              ]}
+            >
+              {
+                course.partner && (
+                  <div class="flex flex-col items-center justify-center gap-2">
+                    <span class="text-[10px] uppercase ">
+                      {course.generalAdmission ? `${percentagePartner}% ` : ''}
+                      {coursesConfig.labelPartner}
+                    </span>
+                    <span class="text-4xl font-bold">
+                      {course.partnerPrice > 0
+                        ? `S/ ${course.partnerPrice}`
+                        : 'Gratuito'}
+                    </span>
+                  </div>
+                )
+              }
+              {
+                course.contracted && (
+                  <div class="flex flex-col items-center justify-center gap-2">
+                    <span class="text-[10px] uppercase ">
+                      {course.generalAdmission
+                        ? `${percentageContracted}% `
+                        : ''}
+                      {coursesConfig.labelContracted}
+                    </span>
+                    <span class="text-4xl font-bold">
+                      {course.contractedPrice > 0
+                        ? `S/ ${course.contractedPrice}`
+                        : 'Gratuito'}
+                    </span>
+                  </div>
+                )
+              }
+            </div>
+            {
+              course.generalAdmission && (
+                <div class="flex flex-col gap-2 justify-center">
+                  <span class="text-[9px] font-bold text-dm-gray-2 uppercase text-center">
+                    {coursesConfig.labelGeneralAdmission}
+                  </span>
+                  <span class="text-4xl text-center">
+                    {course.price > 0 ? `S/ ${course.price}` : 'Gratuito'}
+                  </span>
+                </div>
+              )
+            }
+
+            {
+              course.generalAdmission && (
+                <div class="border border-primary rounded-md p-4 flex gap-4 items-center justify-center">
+                  <Image
+                    src="/assets/hand-star.icon.svg"
+                    alt="Beneficio"
+                    width={35}
+                    height={35}
+                    loading="eager"
+                    transition:name={`image-course-${id}`}
+                  />
+                  <div class="text-primary text-xs flex flex-col">
+                    {course.partner && (
+                      <strong>
+                        {coursesConfig.labelPartner}: {percentagePartner}%
+                      </strong>
+                    )}
+                    {course.contracted && (
+                      <strong>
+                        {coursesConfig.labelContracted}: {percentageContracted}%
+                      </strong>
+                    )}
+                    <span>
+                      {coursesConfig.labelPriceGeneralAdmission}: S/{' '}
+                      {course.price}
+                    </span>
+                  </div>
+                </div>
+              )
+            }
+            {
+              course.showEnrollButton && (
+                <button
+                  data-action="inscription"
+                  data-course-id={id}
+                  data-course-name={course.title}
+                  class="bg-secondary text-white px-4 py-2 rounded-md font-bold"
+                >
+                  {coursesConfig.enrollButtonTextDetail}
+                </button>
+              )
+            }
+            <div class="flex flex-col p-4">
+              {
+                detailTable.map(item => (
+                  <div class="flex items-center justify-between gap-2 border-b border-dm-gray-2 py-4 last:border-b-0">
+                    <span class="font-bold uppercase text-sm">
+                      {item.title}
+                    </span>
+                    <span class="text-base">{item.value}</span>
+                  </div>
+                ))
+              }
+            </div>
+          </div>
+        </aside>
+
+        {
+          course.showLongDescriptionInDetail && (
+            <div class="flex flex-col gap-4" style="grid-area: about">
+              <h2 class="text-secondary font-semibold lg:text-xl">
+                Acerca del curso
+              </h2>
+              <div
+                class:list={[
+                  WYSIWYG_CLASSES,
+                  'text-dm-gray-3 text-sm lg:text-base',
+                ]}
+                set:html={course.longDescription}
+              />
+            </div>
+          )
+        }
+
+        {
+          course.showCertifierInDetail && (
+            <div
+              class="flex flex-col gap-4 p-4 justify-center items-center border border-secondary lg:grid lg:grid-cols-2"
+              style="grid-area: certifier"
+            >
+              <div class="text-secondary font-medium text-center lg:text-xl lg:text-left lg:pl-8">
+                {(course.certifier as Certifier).detailText ||
+                  `Certificado profesional por ${(course.certifier as Certifier).name}`}
+              </div>
+
+              <div class="flex justify-center items-center">
+                <Image
+                  src={directusFileURL((course.certifier as Certifier).logo)}
+                  alt="Certificado"
+                  width={200}
+                  height={100}
+                  loading="eager"
+                />
+              </div>
+            </div>
+          )
+        }
+
+        {
+          tabs.length > 0 && (
+            <div class="flex flex-col gap-4 lg:gap-12" style="grid-area: tabs">
+              <div class="flex gap-4 justify-between lg:justify-start lg:gap-8">
+                {tabs.map(tab => (
+                  <button
+                    type="button"
+                    class="tab text-dm-gray-2 border-b-2 border-transparent hover:text-primary hover:border-primary transition-colors text-sm lg:text-base px-2"
+                    data-content-id={tab.id}
+                  >
+                    {tab.text}
+                  </button>
+                ))}
+              </div>
+
+              <div id="malla-curricular" class="tab-content hidden">
+                <Accordion>
+                  {((course.curriculum || []) as CourseCurriculum[]).map(
+                    item => (
+                      <AccordionItem header={item.title}>
+                        <div
+                          set:html={item.description}
+                          class:list={[WYSIWYG_CLASSES]}
+                        />
+                      </AccordionItem>
+                    )
+                  )}
+                </Accordion>
+              </div>
+              <div id="docentes" class="tab-content hidden">
+                <div class="grid grid-cols-2 gap-4 md:grid-cols-1 lg:gap-8">
+                  {!!course.professors &&
+                    (course.professors as InternalCourse_Professor[]).map(
+                      ({ professor_id }) => (
+                        <ProfessorCard {...(professor_id as Professor)} />
+                      )
+                    )}
+                </div>
+              </div>
+              <div id="comentarios" class="tab-content hidden">
+                <div class="grid gap-4 grid-cols-1 lg:gap-8">
+                  {!!course.comments &&
+                    (course.comments as InternalCourse_Review[]).map(
+                      ({ review_id }) => {
+                        const review = review_id as Review;
+                        return (
+                          <CommentCard
+                            {...review}
+                            body={review.body}
+                            author={review.studentName}
+                            image={directusFileURL(review.studentImage)}
+                            detail={review.studentDetail}
+                          />
+                        );
+                      }
+                    )}
+                </div>
+              </div>
+            </div>
+          )
+        }
+      </div>
+    </div>
+  </div>
+
+  {
+    !!benefits && course.showBenefitsInDetail && (
+      <Partners
+        title={benefits.title}
+        body={benefits.body}
+        image={benefits.image}
+      />
+    )
+  }
+</Layout>
+
+<script type="module" is:inline>
+  const tabs = document.querySelectorAll('.tab');
+  const activeTabClass = ['text-primary', 'border-primary', 'font-bold'];
+  const inactiveTabClass = ['text-dm-gray-2', 'border-transparent'];
+
+  tabs.forEach(tab => {
+    tab.addEventListener('click', () => {
+      const tabContent = document.querySelectorAll('.tab-content');
+      tabContent.forEach(tab => tab.classList.add('hidden'));
+
+      tabs.forEach(otherTab => {
+        otherTab.classList.remove(...activeTabClass);
+        otherTab.classList.add(...inactiveTabClass);
+      });
+
+      tab.classList.add(...activeTabClass);
+      tab.classList.remove(...inactiveTabClass);
+
+      document
+        .querySelector(`#${tab.getAttribute('data-content-id')}`)
+        .classList.remove('hidden');
+    });
+  });
+
+  tabs[0].classList.add(...activeTabClass);
+  tabs[0].classList.remove(...inactiveTabClass);
+  document
+    .querySelector(`#${tabs[0].getAttribute('data-content-id')}`)
+    .classList.remove('hidden');
+</script>

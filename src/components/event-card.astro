@@ -1,0 +1,108 @@
+---
+import { directusFileURL } from '@/utils/directus';
+import { format, parseISO } from 'date-fns';
+import { es as esLocale } from 'date-fns/locale/es';
+
+interface Props {
+  id: string;
+  title: string;
+  image: string;
+  start: string;
+  end: string;
+  type: string;
+  class?: string;
+}
+const { id, title, image, start, end, class: className, type } = Astro.props;
+
+const startDate = parseISO(start);
+const endDate = parseISO(end);
+const eventUrl = `/eventos/${id}`;
+
+const sameDay =
+  format(startDate, 'yyyy-MM-dd') === format(endDate, 'yyyy-MM-dd');
+const sameMonth = format(startDate, 'yyyy-MM') === format(endDate, 'yyyy-MM');
+const sameYear = format(startDate, 'yyyy') === format(endDate, 'yyyy');
+
+const dates = sameDay
+  ? format(startDate, 'd LLLL yyyy', { locale: esLocale })
+  : sameMonth
+    ? `${format(startDate, 'd', { locale: esLocale })} - ${format(endDate, 'd LLLL yyyy', { locale: esLocale })}`
+    : sameYear
+      ? `${format(startDate, 'd LLLL', { locale: esLocale })} - ${format(endDate, 'd LLLL yyyy', { locale: esLocale })}`
+      : `${format(startDate, 'd LLLL yyyy', { locale: esLocale })} - ${format(endDate, 'd LLLL yyyy', { locale: esLocale })}`;
+
+const imageXS = directusFileURL(image, {
+  width: 240,
+  height: 145,
+  format: 'webp',
+  quality: 50,
+  fit: 'cover',
+});
+const imageSM = directusFileURL(image, {
+  width: 323,
+  height: 256,
+  format: 'webp',
+  quality: 50,
+  fit: 'cover',
+});
+const imageLG = directusFileURL(image, {
+  width: 408,
+  height: 256,
+  format: 'webp',
+  quality: 50,
+  fit: 'cover',
+});
+const imageXL = directusFileURL(image, {
+  width: 493,
+  height: 256,
+  format: 'webp',
+  quality: 50,
+  fit: 'cover',
+});
+---
+
+<article
+  class:list={[
+    'min-h-[281px] lg:min-h-[424px]',
+    'course-card grid grid-rows-[auto_1fr] rounded-lg bg-white overflow-hidden w-[168px] shadow-dm md:w-full relative',
+    '[&>picture>img]:grayscale hover:[&>picture>img]:grayscale-0',
+    className,
+  ]}
+>
+  <picture>
+    <source srcset={imageXL} media="(min-width: 1280px)" type="image/webp" />
+    <source srcset={imageLG} media="(min-width: 1024px)" type="image/webp" />
+    <source srcset={imageSM} media="(min-width: 768px)" type="image/webp" />
+    <img
+      src={imageXS}
+      alt={title}
+      width={168}
+      height={145}
+      class="w-[168px] h-[145px] object-cover md:w-full lg:h-[256px] transition-all"
+      transition:name={`image-course-${id}`}
+    />
+  </picture>
+  <span
+    class="bg-[#552685] text-white absolute left-0 top-6 px-2 py-1 text-[10px] font-bold rounded-br-lg uppercase"
+    >{type}</span
+  >
+
+  <div class="grid grid-rows-[1fr_auto_auto] p-3 gap-4 lg:p-4">
+    <a href={eventUrl} title={title} class="block">
+      <h2 class="text-[#552685] text-sm font-bold line-clamp-2 lg:text-lg">
+        {title}
+      </h2>
+    </a>
+    <div class="text-[10px] text-dm-gray-3">
+      {dates}
+    </div>
+    <div class="w-full">
+      <a
+        class="w-full block transition-color bg-white border border-[#552685] text-center text-[#552685] hover:border-primary hover:text-primary px-4 py-1 text-[10px] font-bold rounded-lg xl:text-sm lg:py-2"
+        href={eventUrl}
+      >
+        Más info
+      </a>
+    </div>
+  </div>
+</article>

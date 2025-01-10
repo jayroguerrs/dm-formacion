@@ -1,0 +1,139 @@
+---
+import { directusFileURL } from '@/utils/directus';
+import { format, parse } from 'date-fns';
+
+interface Props {
+  title: string;
+  image: string;
+  start: string;
+  url: string;
+}
+const { title, image, start, url } = Astro.props;
+const startDate = start
+  ? format(parse(start, `yyyy-MM-dd'T'HH:mm:ss`, new Date()), 'dd/MM')
+  : '';
+
+const imageDefault = directusFileURL(image, {
+  width: 300,
+  height: 180,
+  format: 'webp',
+  quality: 80,
+  fit: 'cover',
+});
+
+const imageMD = directusFileURL(image, {
+  width: 370,
+  height: 180,
+  format: 'webp',
+  quality: 80,
+  fit: 'cover',
+});
+
+const imageLG = directusFileURL(image, {
+  width: 490,
+  height: 400,
+  format: 'webp',
+  quality: 80,
+  fit: 'cover',
+});
+
+const imageXL = directusFileURL(image, {
+  width: 750,
+  height: 400,
+  format: 'webp',
+  quality: 80,
+  fit: 'cover',
+});
+---
+
+<style is:global>
+  @keyframes circle1 {
+    0% {
+      top: -38px;
+      left: 20px;
+    }
+    100% {
+      top: 100%;
+      left: 50%;
+    }
+  }
+  @keyframes circle2 {
+    0% {
+      top: 0;
+      left: calc(50% - 2rem);
+    }
+    50% {
+      top: 50%;
+      left: calc(50% - 2rem);
+    }
+    100% {
+      top: 0;
+      left: calc(50% - 2rem);
+    }
+  }
+  @keyframes circle3 {
+    0% {
+      top: 100%;
+      left: 50%;
+    }
+    100% {
+      top: 25%;
+      left: -23px;
+    }
+  }
+  .course-banner-slide {
+    & .circle-1 {
+      animation: circle1 10s linear infinite;
+    }
+    & .circle-2 {
+      animation: circle2 15s ease-in-out infinite;
+    }
+    & .circle-3 {
+      animation: circle3 30s linear infinite;
+    }
+  }
+</style>
+
+<div
+  class="course-banner-slide bg-[#552685] w-full rounded-2xl overflow-hidden relative px-9 py-6 min-h-[200px] lg:min-h-[400px] flex items-center"
+>
+  <span class="rounded-full w-[38px] h-[38px] bg-white/10 absolute circle-1"
+  ></span>
+  <span class="rounded-full w-4 h-4 bg-white/10 absolute circle-2"></span>
+  <span class="rounded-full w-[23px] h-[23px] bg-white/10 absolute circle-3"
+  ></span>
+
+  <picture>
+    <source srcset={imageXL} media="(min-width: 1280px)" type="image/webp" />
+    <source srcset={imageLG} media="(min-width: 1024px)" type="image/webp" />
+    <source srcset={imageMD} media="(min-width: 768px)" type="image/webp" />
+    <img
+      src={imageDefault}
+      alt={title}
+      width={300}
+      height={180}
+      class="object-cover absolute top-0 right-0 w-1/2 h-full"
+    />
+  </picture>
+  <div
+    class="text-white w-1/2 grid grid-rows-[auto_1fr_auto_auto] gap-2 pr-6 h-full"
+  >
+    <div class="flex justify-start">
+      <span
+        class="bg-[#C77EB5] px-2 py-1 uppercase font-bold text-[8px] block w-auto lg:text-xs"
+      >
+        Nuevo curso
+      </span>
+    </div>
+    <h1 class="font-bold text-[10px] lg:text-2xl" set:html={title} />
+    <span class="text-[8px] lg:text-base">Inicio: {startDate}</span>
+    <div class="flex justify-start">
+      <a
+        class="text-white border border-white rounded px-4 py-2 text-[8px] lg:text-sm"
+        href={url}
+      >
+        Más Información
+      </a>
+    </div>
+  </div>
+</div>

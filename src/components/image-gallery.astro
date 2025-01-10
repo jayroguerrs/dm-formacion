@@ -1,0 +1,186 @@
+---
+import { directusFileURL } from '@/utils/directus';
+import { Image } from 'astro:assets';
+interface Props {
+  id?: string;
+  images: string[];
+}
+const { images, id } = Astro.props;
+---
+
+<div
+  id={id || 'image-gallery'}
+  class="image-gallery w-full grid grid-cols-2 gap-4 lg:grid-cols-3"
+>
+  <dialog
+    autofocus
+    class="backdrop:bg-black/80 bg-transparent w-full h-full open:flex flex-col gap-4 justify-center items-center"
+  >
+    <div class="flex justify-end w-full">
+      <button class="dialog-close text-white flex items-center gap-2 text-xs"
+        >Cerrar <Image
+          src="/assets/close.icon.svg"
+          alt="Cerrar"
+          class="w-4 h-4 text-white"
+          width={15}
+          height={15}
+          loading="eager"
+        />
+      </button>
+    </div>
+    <div class="relative w-full flex justify-center items-center">
+      <img
+        src=""
+        alt="evento"
+        class="image-preview w-full h-auto max-h-full max-w-full object-contain"
+      />
+    </div>
+    <div class="flex justify-between w-full">
+      <button class="dialog-prev text-white flex items-center gap-2"
+        ><Image
+          src="/assets/chevron-left.icon.svg"
+          alt="Anterior"
+          class="w-4 h-4"
+          width={15}
+          height={15}
+          loading="eager"
+        /> Anterior</button
+      >
+      <button class="dialog-next text-white flex items-center gap-2"
+        >Siguiente <Image
+          src="/assets/chevron-right.icon.svg"
+          alt="Siguiente"
+          class="w-4 h-4"
+          width={15}
+          height={15}
+          loading="eager"
+        />
+      </button>
+    </div>
+  </dialog>
+  {
+    images.map((image, index) => {
+      const imageSM = directusFileURL(image, {
+        width: 296,
+        height: 167,
+        fit: 'cover',
+        quality: 80,
+        format: 'webp',
+      });
+      const imageMD = directusFileURL(image, {
+        width: 360,
+        height: 203,
+        fit: 'cover',
+        quality: 80,
+        format: 'webp',
+      });
+      const imageLG = directusFileURL(image, {
+        width: 320,
+        height: 180,
+        fit: 'cover',
+        quality: 80,
+        format: 'webp',
+      });
+      const imageXL = directusFileURL(image, {
+        width: 405,
+        height: 230,
+        fit: 'cover',
+        quality: 80,
+        format: 'webp',
+      });
+      const image2XL = directusFileURL(image, {
+        width: 490,
+        height: 275,
+        fit: 'cover',
+        quality: 80,
+        format: 'webp',
+      });
+      return (
+        <button
+          class="image-thumbnail relative w-full h-full aspect-video cursor-pointer"
+          data-image-url={directusFileURL(image)}
+          data-index={index}
+        >
+          <picture>
+            <source srcset={image2XL} media="(min-width: 1536px)" />
+            <source srcset={imageXL} media="(min-width: 1280px)" />
+            <source srcset={imageLG} media="(min-width: 1024px)" />
+            <source srcset={imageMD} media="(min-width: 768px)" />
+            <img
+              src={imageSM}
+              alt="evento"
+              class="block w-full h-full object-cover"
+            />
+          </picture>
+        </button>
+      );
+    })
+  }
+</div>
+
+<script define:vars={{ id }} is:inline>
+  const galleryId = id || 'image-gallery';
+  const imageButtons = document.querySelectorAll(
+    `#${galleryId} button.image-thumbnail`
+  );
+  const prevButton = document.querySelector(
+    `#${galleryId} dialog button.dialog-prev`
+  );
+  const nextButton = document.querySelector(
+    `#${galleryId} dialog button.dialog-next`
+  );
+  const closeButton = document.querySelector(
+    `#${galleryId} dialog button.dialog-close`
+  );
+  let currentIndex = 0;
+
+  imageButtons.forEach(video => {
+    video.addEventListener('click', e => {
+      const index = +(e.currentTarget?.getAttribute('data-index') || '0');
+      showImage(index);
+    });
+  });
+
+  prevButton?.addEventListener('click', () => {
+    if (currentIndex > 0) {
+      showImage(currentIndex - 1);
+    } else {
+      showImage(imageButtons.length - 1);
+    }
+  });
+
+  nextButton?.addEventListener('click', () => {
+    if (currentIndex < imageButtons.length - 1) {
+      showImage(currentIndex + 1);
+    } else {
+      showImage(0);
+    }
+  });
+
+  closeButton?.addEventListener('click', () => {
+    const dialog = document.querySelector(`#${galleryId} dialog`);
+    if (dialog) {
+      const img = dialog.querySelector('.image-preview');
+
+      if (img) {
+        img.setAttribute('src', '');
+      }
+      dialog?.close();
+    }
+  });
+
+  const showImage = index => {
+    currentIndex = index;
+    const imageUrl = imageButtons[index].getAttribute('data-image-url');
+    const dialog = document.querySelector(`#${galleryId} dialog`);
+    if (dialog) {
+      /** @type {HTMLImageElement} */
+      const img = dialog.querySelector('.image-preview');
+
+      if (img) {
+        img.setAttribute('src', imageUrl);
+        dialog.showModal();
+      }
+    }
+  };
+</script>

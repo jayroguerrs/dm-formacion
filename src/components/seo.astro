@@ -1,0 +1,72 @@
+---
+import { directus, directusFileURL } from '@/utils/directus';
+import { readSingleton } from '@directus/sdk';
+import { SEO } from 'astro-seo';
+
+interface Props {
+  title?: string;
+  description?: string;
+  image?: string;
+  tags?: string[];
+  type?: 'article' | 'website';
+}
+
+const { title, description, image, type } = Astro.props;
+const url = `${import.meta.env.SITE_URL}${Astro.url.pathname || ''}${Astro.url.search || ''}`;
+
+const siteConfig = await directus.request(
+  readSingleton('siteConfig', { fields: ['*', { socialNetworks: ['*'] }] })
+);
+
+const seoProps = {
+  title: title,
+  titleTemplate: `%s | ${siteConfig.siteName}`,
+  titleDefault: siteConfig.siteName,
+  description: description,
+  canonical: url,
+  openGraph: {
+    basic: {
+      title: title || siteConfig.siteName,
+      type: type || 'website',
+      image: directusFileURL(image || siteConfig.seoImage, {
+        width: 1200,
+        height: 630,
+        fit: 'cover',
+        quality: 100,
+        format: 'jpg',
+      }),
+      url: url,
+    },
+    optional: {
+      description: description || siteConfig.seoDescription,
+      local: 'pe_ES',
+      siteName: siteConfig.siteName,
+    },
+    image: {
+      type: 'image/jpeg',
+      width: 1200,
+      height: 630,
+    },
+  },
+  ...(siteConfig.seoTwitterAccount
+    ? {
+        twitter: {
+          cardType: 'summary_large_image',
+          site: siteConfig.seoTwitterAccount,
+          creator: siteConfig.seoTwitterAccount,
+          title: title || siteConfig.siteName,
+          image: directusFileURL(image || siteConfig.seoImage, {
+            width: 1200,
+            height: 675,
+            fit: 'cover',
+            quality: 100,
+            format: 'jpg',
+          }),
+          description: description || siteConfig.seoDescription,
+        },
+      }
+    : {}),
+};
+---
+
+<SEO {...seoProps} />

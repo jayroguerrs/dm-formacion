@@ -1,0 +1,71 @@
+---
+/**
+ * This will read "pagina" from the search params to get the current page
+ */
+
+interface Props {
+  totalPages: number;
+}
+
+const { totalPages } = Astro.props;
+const { searchParams, pathname } = Astro.url;
+
+const page = parseInt(searchParams.get('pagina') || '1');
+---
+
+<div class="container mx-auto p-4">
+  <div class="flex justify-center gap-4 items-center">
+    {
+      page > 1 && (
+        <a
+          class:list={[
+            'border border-dm-gray-2 rounded-lg px-4 py-2 text-sm hover:border-primary hover:text-primary',
+            {
+              'border-primary text-primary': page === 1,
+            },
+          ]}
+          href={`${pathname}?pagina=${page - 1}`}
+        >
+          Anterior
+        </a>
+      )
+    }
+
+    {
+      [...Array(totalPages)].map((_, i) => {
+        const newSearchParams = new URLSearchParams(searchParams);
+        newSearchParams.set('pagina', `${i + 1}`);
+        return (
+          <a
+            class:list={[
+              'hidden lg:block',
+              'border border-dm-gray-2 rounded-lg px-4 py-2 text-sm hover:border-primary hover:text-primary',
+              {
+                'border-primary text-primary':
+                  page === i + 1 || page === totalPages,
+              },
+            ]}
+            href={`${pathname}?${newSearchParams.toString()}`}
+          >
+            {i + 1}
+          </a>
+        );
+      })
+    }
+    {
+      page !== totalPages && (
+        <a
+          class:list={[
+            'border border-dm-gray-2 rounded-lg px-4 py-2 text-sm hover:border-primary hover:text-primary',
+            {
+              'border-primary text-primary': page === totalPages,
+            },
+          ]}
+          href={`${pathname}?pagina=${page + 1}`}
+        >
+          Siguiente
+        </a>
+      )
+    }
+  </div>
+</div>

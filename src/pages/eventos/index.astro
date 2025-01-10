@@ -1,0 +1,118 @@
+---
+import EventBanner from '@/components/event-banner.astro';
+import EventsCarousel2 from '@/components/events-carousel-2.astro';
+import Layout from '@/layouts/root.layout.astro';
+import { directus } from '@/utils/directus';
+import { readItems, readSingleton } from '@directus/sdk';
+import { format } from 'date-fns';
+import SEO from '@/components/seo.astro';
+import Breadcrumb from '@/components/breadcrumb.astro';
+
+const featuredEventsRequest = directus.request(
+  readItems('event', {
+    limit: 3,
+    sort: 'start',
+    fields: ['id', 'title', 'modality', 'image', 'start', 'end'],
+    filter: {
+      _and: [
+        { status: { _eq: 'published' } },
+        { featured: { _eq: true } },
+        { start: { _gte: format(new Date(), 'dd-MM-yy') } },
+      ],
+    },
+  })
+);
+
+const futureEventsRequest = directus.request(
+  readItems('event', {
+    sort: 'start',
+    fields: ['id', 'title', 'modality', 'image', 'start', 'end'],
+    filter: {
+      _and: [
+        { status: { _eq: 'published' } },
+        { start: { _gte: format(new Date(), 'dd-MM-yy') } },
+      ],
+    },
+  })
+);
+const pastEventsRequest = directus.request(
+  readItems('event', {
+    sort: '-start',
+    fields: ['id', 'title', 'modality', 'image', 'start', 'end'],
+    filter: {
+      _and: [
+        { status: { _eq: 'published' } },
+        { start: { _lte: format(new Date(), 'dd-MM-yy') } },
+      ],
+    },
+  })
+);
+const eventsConfigRequest = directus.request(readSingleton('eventsConfig'));
+
+const [featuredEvents, futureEvents, pastEvents, eventsConfig] =
+  await Promise.all([
+    featuredEventsRequest,
+    futureEventsRequest,
+    pastEventsRequest,
+    eventsConfigRequest,
+  ]);
+---
+
+<SEO title="Eventos" />
+
+<Layout>
+  <Breadcrumb
+    items={[
+      { text: 'Home', url: '/', icon: '/assets/home.icon.svg' },
+      { text: 'Eventos' },
+    ]}
+  />
+  {
+    eventsConfig.showMainBanner && (
+      <EventBanner
+        id="featured-events"
+        slides={featuredEvents.map(event => ({
+          id: event.id,
+          title: event.title,
+          image: event.image,
+          start: event.start,
+          end: event.end,
+          url: `/eventos/${event.id}`,
+        }))}
+      />
+    )
+  }
+  {
+    eventsConfig.showUpcomingEvents && (
+      <EventsCarousel2
+        id="future-events"
+        title="Próximos eventos"
+        events={futureEvents.map(event => ({
+          id: event.id,
+          title: event.title,
+          type: event.modality,
+          image: event.image,
+          start: event.start,
+          end: event.end,
+        }))}
+      />
+    )
+  }
+  {
+    eventsConfig.showPastEvents && (
+      <EventsCarousel2
+        id="past-events"
+        title="Eventos anteriores"
+        filter={true}
+        events={pastEvents.map(event => ({
+          id: event.id,
+          title: event.title,
+          type: event.modality,
+          image: event.image,
+          start: event.start,
+          end: event.end,
+        }))}
+      />
+    )
+  }
+</Layout>

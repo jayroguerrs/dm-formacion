@@ -1,0 +1,178 @@
+---
+import Spinner from '@/components/spinner.astro';
+import Layout from '@/layouts/root.layout.astro';
+import { directus } from '@/utils/directus';
+import { readUsers } from '@directus/sdk';
+import jwt from 'jsonwebtoken';
+
+const { searchParams } = Astro.url;
+const token = searchParams.get('token');
+
+if (!token) {
+  return Astro.redirect('/404');
+}
+
+const userExists = await directus.request(
+  readUsers({
+    filter: {
+      //@ts-ignore
+      tempToken: { _eq: token },
+    },
+  })
+);
+
+if (userExists.length === 0) {
+  return Astro.redirect('/404');
+}
+
+const secret = import.meta.env.DIRECTUS_SECRET;
+const { valid, userId }: { valid: boolean; userId: string } = await new Promise(
+  resolve => {
+    jwt.verify(
+      token,
+      secret,
+      //@ts-ignore
+      (error: any, decoded: { userId: string; exp: number }) => {
+        if (error) resolve({ valid: false, userId: '' });
+        const now = Date.now();
+        const expired = now >= decoded.exp * 1000;
+        resolve({ valid: !expired, userId: decoded.userId });
+      }
+    );
+  }
+);
+
+if (!valid) {
+  return Astro.redirect('/404');
+}
+---
+
+<style>
+  .reset-password-form {
+    & input:focus {
+      outline-color: #903f97;
+    }
+  }
+</style>
+
+<Layout>
+  <div class="bg-gradient-to-r from-[#552685] to-[#903F97] relative">
+    <div class="container mx-auto p-4">
+      <h1 class="text-white text-2xl">Registra tu contraseña</h1>
+    </div>
+  </div>
+
+  <div class="w-full mx-auto p-4 py-12 md:w-[500px]">
+    <form
+      id="reset-password-form"
+      class="reset-password-form flex flex-col items-center justify-center gap-4"
+    >
+      <div
+        class="server-error bg-red-400 text-white text-sm hidden px-8 py-4 text-center w-full"
+      >
+      </div>
+      <div
+        class="server-success bg-green-500 text-white text-sm hidden px-8 py-4 text-center w-full"
+      >
+        Contraseña grabada con éxito<br />
+        <a href="/" class="undeline">Ir al home</a>
+      </div>
+      <div class="w-full">
+        <input type="hidden" name="token" value={token} />
+        <input type="hidden" name="userId" value={userId} />
+        <input
+          type="password"
+          name="password"
+          placeholder="Contraseña"
+          class="w-full text-dm-gray-6 placeholder:text-dm-gray-6 bg-dm-gray-5/80 rounded-lg text-lg p-4"
+        />
+        <span class="text-xs text-red-500 error-message"></span>
+      </div>
+      <div class="w-full">
+        <input
+          type="password"
+          name="repeatPassword"
+          placeholder="Repite la Contraseña"
+          class="w-full text-dm-gray-6 placeholder:text-dm-gray-6 bg-dm-gray-5/80 rounded-lg text-lg p-4"
+        />
+        <span class="text-xs text-red-500 error-message"></span>
+      </div>
+      <p class="text-sm text-dm-gray-7 text-center">
+        Utiliza un mínimo de 6 caracteres (distingue minúsculas de mayúsculas)
+      </p>
+
+      <div class="flex gap-4">
+        <button
+          class="bg-secondary text-white rounded-lg px-4 py-2 border border-transparent hover:bg-primary hover:border-primary"
+          type="submit"
+        >
+          Guardar
+        </button>
+      </div>
+      <Spinner class="hidden" />
+    </form>
+  </div>
+</Layout>
+
+<script>
+  import { isInputError } from 'astro:actions';
+  import { actions } from 'astro:actions';
+
+  const form = document.querySelector('#reset-password-form');
+
+  const onSubmit = async (e: SubmitEvent) => {
+    e.preventDefault();
+    clearErrors();
+    setLoading(true);
+    const formData = new FormData(e.currentTarget as HTMLFormElement);
+    const { data, error } = await actions.resetPassword(formData);
+    setLoading(false);
+    if (error) {
+      if (isInputError(error)) {
+        showErrors(error.fields);
+      } else {
+        showServerError(error.message);
+      }
+    }
+
+    if (data?.success) {
+      form?.querySelector('.server-success')?.classList.remove('hidden');
+      //@ts-ignore
+      form?.removeEventListener('submit', onSubmit);
+    }
+  };
+
+  //@ts-ignore
+  form?.addEventListener('submit', onSubmit);
+
+  const showErrors = (errors: { [field: string]: string[] | undefined }) => {
+    Object.entries(errors).forEach(([name, messages]) => {
+      const errorField = form
+        ?.querySelector(`[name="${name}"]`)
+        ?.parentElement?.querySelector('.error-message');
+      if (errorField && messages && messages?.length > 0)
+        errorField.innerHTML = messages[0];
+    });
+  };
+
+  const showServerError = (message: string) => {
+    const serverError = form?.querySelector('.server-error');
+    if (serverError) {
+      serverError.innerHTML = message;
+      serverError.classList.remove('hidden');
+    }
+  };
+
+  const clearErrors = () => {
+    form
+      ?.querySelectorAll('.error-message')
+      .forEach(errorField => (errorField.innerHTML = ''));
+
+    form?.querySelector('.server-error')?.classList.add('hidden');
+  };
+
+  const setLoading = (loading: boolean) => {
+    form?.querySelector('.spinner')?.classList.toggle('hidden', !loading);
+    form?.querySelector('.actions')?.classList.toggle('hidden', loading);
+  };
+</script>

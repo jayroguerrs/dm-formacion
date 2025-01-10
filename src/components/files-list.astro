@@ -1,0 +1,38 @@
+---
+import { directusFileURL } from '@/utils/directus';
+import { Image } from 'astro:assets';
+
+interface Props {
+  files: {
+    filename: string;
+    title: string;
+    id: string;
+    type: string;
+  }[];
+}
+
+const { files } = Astro.props;
+---
+
+<div class="container px-4 py mx-auto">
+  <div class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+    {
+      files.map(file => (
+        <a
+          href={`${directusFileURL(file.id)}?download`}
+          class="flex gap-4 items-center [&>h3]:hover:underline"
+          download
+        >
+          <Image
+            src="/assets/file.icon.svg"
+            alt="file"
+            width={36}
+            height={44}
+            loading="eager"
+          />
+          <h3 class="text-sm">{file.title}</h3>
+        </a>
+      ))
+    }
+  </div>
+</div>

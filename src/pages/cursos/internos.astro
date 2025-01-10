@@ -1,0 +1,343 @@
+---
+import CourseBanner from '@/components/course-banner.astro';
+import CourseCard from '@/components/course-card.astro';
+import Pagination from '@/components/pagination.astro';
+import Layout from '@/layouts/root.layout.astro';
+import { directus, type Certifier } from '@/utils/directus';
+import { readItems, readField, aggregate, readSingleton } from '@directus/sdk';
+import { format } from 'date-fns';
+import SEO from '@/components/seo.astro';
+import Breadcrumb from '@/components/breadcrumb.astro';
+import Partners from '@/components/partners.astro';
+import SortSelect from '@/components/sort-select.astro';
+
+const { searchParams } = Astro.url;
+
+const itemsPerPage = 8;
+const selectedCategory = searchParams.get('categoria') || undefined;
+const page = parseInt(searchParams.get('pagina') || '1');
+const sort =
+  (searchParams.get('orden') as
+    | 'start'
+    | '-start'
+    | 'title'
+    | '-title'
+    | 'price'
+    | '-price') || 'start';
+const offset = (page - 1) * itemsPerPage;
+
+const sortOptions = [
+  { value: 'start', text: 'Fecha (más cercano primero)' },
+  { value: '-start', text: 'Fecha (más lejano primero)' },
+  { value: 'title', text: 'A - Z' },
+  { value: '-title', text: 'Z - A' },
+  { value: 'price', text: 'Precio (menor a mayor)' },
+  { value: '-price', text: 'Precio (mayor a menow)' },
+];
+
+const featuredRequest = directus.request(
+  readItems('internalCourse', {
+    filter: {
+      _and: [
+        {
+          status: {
+            _eq: 'published',
+          },
+        },
+        {
+          featured: {
+            _eq: true,
+          },
+        },
+        // {
+        //   start: {
+        //     _gte: format(new Date(), 'dd-MM-yy'),
+        //   },
+        // },
+      ],
+    },
+  })
+);
+
+const futureCoursesRequest = directus.request(
+  readItems('internalCourse', {
+    limit: itemsPerPage,
+    offset,
+    sort: 'start',
+    fields: ['*', { certifier: ['*'] }],
+    filter: {
+      _and: [
+        {
+          status: {
+            _eq: 'published',
+          },
+        },
+        {
+          start: {
+            _gte: format(new Date(), 'dd-MM-yy'),
+          },
+        },
+        ...(selectedCategory ? [{ type: { _eq: selectedCategory } }] : []),
+      ],
+    },
+  })
+)
+
+const countFutureCoursesRequest = directus.request(
+  aggregate('internalCourse', {
+    aggregate: { count: '*' },
+    query: {
+      filter: {
+        _and: [
+          {
+            status: {
+              _eq: 'published',
+            },
+          },
+          {
+            start: {
+              _gte: format(new Date(), 'dd-MM-yy'),
+            },
+          },
+          ...(selectedCategory ? [{ type: { _eq: selectedCategory } }] : []),
+        ],
+      },
+    },
+  })
+);
+const countCoursesRequest = directus.request(
+  aggregate('internalCourse', {
+    aggregate: { count: '*' },
+    query: {
+      filter: {
+        _and: [
+          {
+            status: {
+              _eq: 'published',
+            },
+          },
+          ...(sort.endsWith("start") ?  [{
+          start: {
+            _lt: format(new Date(), 'dd-MM-yy'),
+          },
+        }] : []),
+          ...(selectedCategory ? [{ type: { _eq: selectedCategory } }] : []),
+        ],
+      },
+    },
+  })
+);
+
+const categoriesRequest = directus.request(readField('internalCourse', 'type'));
+
+const benefitsBannerRequest = directus.request(readSingleton('benefitsBanner'));
+
+const coursesConfigRequest = directus.request(readSingleton('coursesConfig'));
+
+const [
+  featured,
+  categoryField,
+  countFutureCourses,
+  countCourses,
+  benefits,
+  coursesConfig,
+  futureCourses = [],
+] = await Promise.all([
+  featuredRequest,
+  categoriesRequest,
+  countFutureCoursesRequest,
+  countCoursesRequest,
+  benefitsBannerRequest,
+  coursesConfigRequest,
+  ...(sort.endsWith("start") ? [futureCoursesRequest] : []),
+]);
+const futureCoursesTotal = sort.endsWith("start") ? +(countFutureCourses[0]?.count || '0') : 0;
+const coursesOffset = offset - futureCoursesTotal;
+const oldCourses = await directus.request(
+  readItems('internalCourse', {
+    limit: -1,
+    offset: coursesOffset > 0 ? coursesOffset : 0,
+    sort,
+    fields: ['*', { certifier: ['*'] }],
+    filter: {
+      _and: [
+        {
+          status: {
+            _eq: 'published',
+          },
+        },
+       ...(sort.endsWith("start") ?  [{
+          start: {
+            _lt: format(new Date(), 'dd-MM-yy'),
+          },
+        }] : []),
+        ...(selectedCategory ? [{ type: { _eq: selectedCategory } }] : []),
+      ],
+    },
+  })
+);
+const courses = oldCourses.slice(0, itemsPerPage - futureCourses.length);
+
+const totalCourses = +(countCourses[0]?.count || '0') + futureCoursesTotal;
+const totalPages = Math.ceil(totalCourses / itemsPerPage);
+
+const categories = (categoryField.meta.options?.choices || []) as {
+  value: string;
+  text: string;
+}[];
+
+const navItems = [
+  {
+    text: 'Cursos Internos',
+    url: '/cursos/internos',
+    active: true,
+    enabled: coursesConfig.showInternalCourses,
+  },
+  {
+    text: 'Cursos Externos',
+    url: '/cursos/externos',
+    active: false,
+    enabled: coursesConfig.showExternalCourses,
+  },
+].filter(item => item.enabled);
+---
+
+<SEO title="Cursos Internos" />
+<Layout>
+  <Breadcrumb
+    items={[
+      { text: 'Home', url: '/', icon: '/assets/home.icon.svg' },
+      { text: 'Cursos Internos' },
+    ]}
+  />
+
+  {
+    coursesConfig.showInternalCoursesBanner && (
+      <CourseBanner
+        id="course-banner"
+        slides={featured.map(course => ({
+          id: course.id,
+          title: course.title,
+          image: course.image,
+          start: course.start,
+          url: `/courses/${course.id}`,
+        }))}
+      />
+    )
+  }
+
+  {
+    coursesConfig.showInternalCourses && (
+    <div class="container mx-auto p-4 pb-0 mb-4 justify-center flex items-center gap-4">
+    {
+      navItems.map(item => (
+        <a
+          href={item.url}
+          class:list={[
+            'text-en-gray2 hover:border-primary border-b text-center text-primary',
+            'p-2 lg:px-4',
+            {
+              'font-bold border-primary': item.active,
+              'border-transparent': !item.active,
+            },
+          ]}
+        >
+          {item.text}
+        </a>
+      ))
+    }
+    </div>
+
+    <div class="w-[calc(100vw-1rem)] p-4 lg:container mx-auto grid grid-rows-[auto_auto] gap-4 lg:grid-rows-1 lg:grid-cols-[1fr_auto] lg:justify-between lg:items-center">
+      <div
+        class="flex gap-4 items-center justify-center lg:justify-start flex-wrap lg:flex-nowrap"
+      >
+        <a
+          class:list={[
+            'border border-dm-gray-2 rounded-md px-4 py-2 text-sm hover:border-primary hover:text-primary',
+            {
+              'border-primary text-primary': selectedCategory === undefined,
+            },
+          ]}
+          href={`/cursos/internos`}
+        >
+          Todos
+        </a>
+        {
+          categories.map(category => (
+            <a
+              class:list={[
+                'border border-dm-gray-2 rounded-md px-4 py-2 text-sm hover:border-primary hover:text-primary',
+                {
+                  'border-primary text-primary':
+                    selectedCategory === category.value,
+                },
+              ]}
+              href={`/cursos/internos?categoria=${category.value}`}
+            >
+              {category.text}
+            </a>
+          ))
+        }
+      </div>
+      <div class="w-full flex justify-center">
+        <SortSelect sortOptions={sortOptions} sort={sort} />
+
+      </div>
+    </div>
+
+    <div class="pb-12">
+      <div class="container mx-auto py-4 px-2 md:px-4">
+        {
+          (futureCourses.length + courses.length) === 0 && (
+            <div class="text-center flex justify-center">
+              No se han encontrado resultados
+            </div>
+          )
+        }
+        {
+         (futureCourses.length + courses.length) > 0 && (
+            <div class="grid grid-cols-2 gap-2 md:gap-4 sm:grid-cols-3 lg:grid-cols-4">
+              {[...futureCourses, ...courses].map(course => (
+                <div class="flex justify-center">
+                  <CourseCard
+                    id={course.id}
+                    title={course.title}
+                    image={course.image}
+                    start={course.start}
+                    duration={course.duration}
+                    certifier={(course.certifier as Certifier).name}
+                    certifierLogo={(course.certifier as Certifier).logo}
+                    price={course.generalAdmission ? course.price : undefined}
+                    partnerPrice={
+                      course.partner ? course.partnerPrice : undefined
+                    }
+                    category={course.type}
+                    type="internal"
+                    labelGeneralAdmission={coursesConfig.labelGeneralAdmission}
+                    labelPartner={coursesConfig.labelPartner}
+                    enrollButtonText={coursesConfig.enrollButtonTextCard}
+                    showEnrollButton={course.showEnrollButton}
+                  />
+                </div>
+              ))}
+            </div>
+          )
+        }
+      </div>
+
+      {(futureCourses.length + courses.length) > 0 && <Pagination totalPages={totalPages} />}
+    </div>
+    )
+  }
+
+  {
+    !!benefits && coursesConfig.showBenefits && (
+      <Partners
+        title={benefits.title}
+        body={benefits.body}
+        image={benefits.image}
+      />
+    )
+  }
+</Layout>

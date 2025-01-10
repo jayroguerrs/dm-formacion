@@ -1,0 +1,87 @@
+---
+import { WYSIWYG_CLASSES } from '@/utils/constants';
+import { directusFileURL } from '@/utils/directus';
+import { Image } from 'astro:assets';
+
+interface Props {
+  image: string;
+  name: string;
+  profession: string;
+  linkedin: string;
+  description: string;
+  descriptionList: string;
+}
+const { image, name, profession, linkedin, description, descriptionList } =
+  Astro.props;
+
+const imageDefault = directusFileURL(image, {
+  width: 78,
+  height: 78,
+  fit: 'cover',
+  quality: 80,
+  format: 'webp',
+});
+const imageLG = directusFileURL(image, {
+  width: 230,
+  height: 230,
+  fit: 'cover',
+  quality: 80,
+  format: 'webp',
+});
+---
+
+<div class="relative pt-[35px] lg:pt-[115px] h-full">
+  <div
+    class="bg-white shadow-dm relative flex flex-col gap-4 items-center p-4 pt-[50px] lg:p-8 lg:pt-[130px] h-full"
+  >
+    <div
+      class="rounded-full w-[78px] h-[78px] lg:w-[230px] lg:h-[230px] overflow-hidden border-[3px] border-white shadow-md absolute -top-[35px] lg:-top-[115px] mx-auto"
+    >
+      <picture>
+        <source
+          srcset={imageLG}
+          media="(min-width: 1024px)"
+          type="image/webp"
+        />
+        <Image
+          src={imageDefault}
+          alt={name}
+          width={230}
+          height={230}
+          class="block w-full h-full fit-cover"
+        />
+      </picture>
+    </div>
+
+    <div>
+      <div class="text-center text-[#552685] font-bold text-sm lg:text-xl">
+        {name}
+      </div>
+      <div class="text-center text-dm-gray-8 text-[10px] lg:text-base">
+        {profession}
+      </div>
+    </div>
+
+    <a href={linkedin} target="_blank">
+      <Image
+        src="/assets/linkedin-color.icon.svg"
+        alt="linkedin"
+        width={22}
+        height={22}
+      />
+    </a>
+
+    <div
+      set:html={description}
+      class:list={[
+        WYSIWYG_CLASSES,
+        'text-center text-[10px] text-dm-gray-8 lg:text-base',
+      ]}
+    />
+
+    <div
+      set:html={descriptionList}
+      class:list={[WYSIWYG_CLASSES, 'text-[10px] text-dm-gray-8 lg:text-base']}
+    />
+  </div>
+</div>

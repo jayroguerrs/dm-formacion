@@ -1,0 +1,27 @@
+---
+interface Props {
+  url: string;
+  title?: string;
+}
+const { url, title } = Astro.props;
+let videoId = '';
+const videoURL = new URL(url);
+if (videoURL.hostname === 'www.youtube.com') {
+  if (videoURL.pathname.startsWith('/embed/')) {
+    videoId = videoURL.pathname.split('/')[1];
+  } else if (videoURL.searchParams.has('v')) {
+    videoId = videoURL.searchParams.get('v') || '';
+  }
+} else if (videoURL.hostname === 'youtu.be') {
+  videoId = videoURL.pathname;
+}
+---
+
+<div class="relative w-full h-ful aspect-video">
+  <iframe
+    class="absolute top-0 left-0 w-full h-full"
+    src={`https://www.youtube.com/embed/${videoId}`}
+    title={title || 'YouTube video player'}
+    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+    allowfullscreen></iframe>
+</div>

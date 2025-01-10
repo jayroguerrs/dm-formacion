@@ -1,0 +1,42 @@
+---
+import { Image } from 'astro:assets';
+
+import { WYSIWYG_CLASSES } from '@/utils/constants';
+
+interface Props {
+  body: string;
+  author: string;
+  image: string;
+  detail: string;
+}
+const { body, author, image, detail } = Astro.props as Props;
+---
+
+<div
+  class:list={[
+    'rounded-[10px] shadow-dm bg-white p-6 grid grid-rows-[1fr_auto] gap-2 items-center w-full lg:px-8',
+    'md:gap-8',
+  ]}
+>
+  <div
+    class:list={[WYSIWYG_CLASSES, 'text-center text-xs lg:text-lg']}
+    set:html={body}
+  />
+  <div class="flex gap-4 items-center justify-center">
+    <Image
+      src={image}
+      alt={author}
+      width="73"
+      height="73"
+      class="rounded-full overflow-hidden w-[40px] h-[40px] lg:w-[73px] lg:h-[73px]"
+    />
+    <div class="flex flex-col lg:items-start">
+      <span class="text-left text-xs font-bold lg:text-xl">
+        {author}
+      </span>
+      <span class="text-left text-[10px] lg:text-base">
+        {detail}
+      </span>
+    </div>
+  </div>
+</div>

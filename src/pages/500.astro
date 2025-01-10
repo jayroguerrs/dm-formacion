@@ -1,0 +1,33 @@
+---
+import Layout from '@/layouts/root.layout.astro';
+
+interface Props {
+    error: unknown
+}
+
+const { error } = Astro.props;
+//@ts-ignore
+const statusCode = error?.response?.status || 0;
+console.error(statusCode, error)
+//@ts-ignore
+// console.error('[ERROR]', statusCode, error?.response?.statusText, (error?.errors as Array || [])?.map(({message}) => message))
+
+const url = Astro.url;
+if([500, 502].includes(statusCode)) return Astro.redirect(url.href)
+---
+
+<Layout>
+  <div class="h-full flex justify-center items-center">
+    <div class="flex flex-col gap-4">
+      <h1 class="text-4xl font-bold text-dm-gray-1 text-center">
+        Ocurrió un error
+      </h1>
+      <p class="text-lg text-dm-gray-2 text-center">
+        Vuelve a intentarlo en unos minutos
+      </p>
+      <p class="text-lg text-primary text-center">
+        <a href="/">Ir al home</a>
+      </p>
+    </div>
+  </div>
+</Layout>

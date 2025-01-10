@@ -1,0 +1,100 @@
+---
+import { Image } from 'astro:assets';
+
+interface Props {
+  id: string;
+  class?: string;
+}
+
+const { id, class: className } = Astro.props;
+---
+
+<style is:global>
+  dialog {
+    transition:
+      display 0.5s allow-discrete,
+      overlay 0.5s allow-discrete;
+    animation: dialog-close 0.5s forwards;
+
+    &[open] {
+      animation: dialog-open 0.5s forwards;
+    }
+
+    &:not([open]) {
+      pointer-events: none;
+      opacity: 0;
+    }
+    & input:focus,
+    & select:focus {
+      outline-color: #903f97;
+    }
+
+    &::backdrop {
+      backdrop-filter: blur(0.25rem);
+    }
+  }
+
+  @keyframes dialog-open {
+    from {
+      opacity: 0;
+      transform: translateY(30px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes dialog-close {
+    from {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    to {
+      opacity: 0;
+      transform: translateY(30px);
+    }
+  }
+</style>
+
+<dialog
+  id={id}
+  class:list={[
+    'backdrop:bg-black/80 w-[475px] max-w-[calc(100%-2rem)] bg-white rounded-lg',
+    'fixed',
+    className,
+  ]}
+>
+  <header
+    class="bg-primary flex justify-between items-center p-4 sticky top-0 z-[99999999]"
+  >
+    <Image
+      src="/assets/logo-white.svg"
+      alt="logo"
+      width={127}
+      height={32}
+      loading="eager"
+      class="w-[127px] h-[32px]"
+    />
+    <Image
+      src="/assets/close.icon.svg"
+      alt="logo"
+      width={20}
+      height={20}
+      loading="eager"
+      class="w-[30px] h-[32px] cursor-pointer"
+      onclick={`window.${id}.close()`}
+    />
+  </header>
+  <div
+    class="server-error bg-red-400 text-white text-sm hidden px-8 py-4 text-center"
+  >
+  </div>
+  <div
+    class="server-success bg-green-500 text-white text-sm hidden px-8 py-4 text-center w-full"
+  >
+  </div>
+  <div class="px-8 py-10">
+    <slot />
+  </div>
+</dialog>

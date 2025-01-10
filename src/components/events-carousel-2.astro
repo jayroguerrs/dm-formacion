@@ -1,0 +1,224 @@
+---
+import { Image } from 'astro:assets';
+import 'swiper/css';
+import EventCard from './event-card.astro';
+
+interface EventProp {
+  id: string;
+  title: string;
+  image: string;
+  start: string;
+  end: string;
+  type: string;
+}
+
+interface Props {
+  title: string;
+  events: EventProp[];
+  id: string;
+  filter?: boolean;
+}
+
+const { title, events, id, filter } = Astro.props;
+
+const years: string[] = [];
+events.forEach(event => {
+  const year = new Date(event.start).getFullYear().toString();
+  if (!years.includes(year)) {
+    years.push(year);
+  }
+});
+---
+
+<style>
+  .swiper {
+    width: 100%;
+    height: 100%;
+
+    @media (min-width: 768px) {
+      overflow: visible;
+    }
+  }
+
+  .swiper-container {
+    @media (min-width: 768px) {
+      gap: 1rem;
+    }
+  }
+
+  .swiper-slide {
+    display: flex !important;
+    justify-content: center;
+    align-items: center;
+    width: 184px !important;
+    height: auto !important;
+
+    @media (min-width: 768px) {
+      width: 33.333% !important;
+      padding: 0 0.5rem;
+      /* width: 295px !important; */
+
+      &:first-child {
+        padding-left: 0;
+      }
+
+      &:last-child {
+        padding-right: 0;
+      }
+    }
+  }
+
+  .carousel-navigation {
+    position: absolute;
+    top: 1.5rem;
+    right: 1rem;
+    z-index: 50;
+    display: flex;
+
+    & > button:disabled {
+      display: none;
+    }
+  }
+</style>
+
+<events-carousel data-id={id}>
+  <div
+    id={id}
+    class="events-carousel container mx-auto p-4 flex flex-col gap-8 relative"
+  >
+    <div class="flex gap-4 justify-between">
+      <h1 class="text-primary text-lg font-bold lg:text-3xl">{title}</h1>
+    </div>
+    {
+      filter && (
+        <div class="flex flex-wrap gap-4 justify-center lg:justify-start">
+          {years.map(year => (
+            <button
+              type="button"
+              data-value={year}
+              class="btn-year text-dm-gray-2 border border-dm-gray-2 rounded-md px-4 py-2 text-sm hover:border-primary hover:text-primary"
+            >
+              {year}
+            </button>
+          ))}
+        </div>
+      )
+    }
+
+    <div class="category-content h-full" id={`${id}-events`}>
+      <div class="carousel-navigation">
+        <button class="button-prev" type="button">
+          <Image
+            src="/assets/img/prev-green.svg"
+            alt="prev"
+            width="30"
+            height="30"
+            loading="eager"
+          />
+        </button>
+        <button class="button-next" type="button">
+          <Image
+            src="/assets/img/next-green.svg"
+            alt="next"
+            width="30"
+            height="30"
+            loading="eager"
+          />
+        </button>
+      </div>
+      <div class="max-w-[calc(100vw_-_3rem)] sm:w-full overflow-hidden h-full">
+        <div class="swiper">
+          <div class="swiper-wrapper">
+            {
+              events.map(({ id, title, image, start, end, type }) => (
+                <div
+                  class="swiper-slide"
+                  data-year={new Date(start).getFullYear().toString()}
+                >
+                  <EventCard
+                    id={id}
+                    title={title}
+                    image={image}
+                    start={start}
+                    end={end}
+                    type={type}
+                  />
+                </div>
+              ))
+            }
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</events-carousel>
+
+<script type="module" is:inline>
+  import Swiper from 'https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.mjs';
+
+  class EventsCarousel extends HTMLElement {
+    constructor() {
+      super();
+
+      this.id = this.dataset.id;
+      this.slides = document.querySelectorAll(
+        `#${this.id}-events .swiper-slide`
+      );
+
+      this.swiper = new Swiper(`#${this.id}-events .swiper`, {
+        speed: 500,
+        navigation: {
+          nextEl: `#${this.id}-events .button-next`,
+          prevEl: `#${this.id}-events .button-prev`,
+        },
+        centeredSlides: false,
+        slidesPerView: 'auto',
+        spaceBetween: 0,
+        draggable: false,
+        breakpoints: {
+          768: {
+            slidesPerView: 3,
+          },
+        },
+      });
+
+      const years = document.querySelectorAll(`#${this.id} .btn-year`);
+      if (years.length > 0) {
+        const activeYearClass = ['text-primary', 'border-primary'];
+        const inactiveYearClass = ['text-dm-gray-2', 'border-dm-gray-2'];
+
+        years.forEach(year => {
+          year.addEventListener('click', e => {
+            const year = e.target;
+            years.forEach(otherYear => {
+              otherYear.classList.remove(...activeYearClass);
+              otherYear.classList.add(...inactiveYearClass);
+            });
+            year.classList.remove(...inactiveYearClass);
+            year.classList.add(...activeYearClass);
+
+            this.showSlides(year.getAttribute('data-value'));
+          });
+        });
+
+        years[0].classList.add(...activeYearClass);
+        years[0].classList.remove(...inactiveYearClass);
+        this.showSlides(years[0].getAttribute('data-value'));
+      }
+    }
+
+    showSlides(year) {
+      this.swiper.removeAllSlides();
+
+      this.slides.forEach(slide => {
+        const yearSlide = slide.getAttribute('data-year');
+        if (yearSlide === year) {
+          this.swiper.appendSlide(slide);
+        }
+      });
+    }
+  }
+
+  customElements.get('events-carousel') ||
+    customElements.define('events-carousel', EventsCarousel);
+</script>

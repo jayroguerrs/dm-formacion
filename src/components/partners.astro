@@ -1,0 +1,35 @@
+---
+import { directusFileURL } from '@/utils/directus';
+import { Image } from 'astro:assets';
+interface Props {
+  title: string;
+  body: string;
+  image?: string;
+}
+
+const { title, body, image } = Astro.props as Props;
+---
+
+<div class="bg-primary">
+  <div
+    class="container mx-auto p-4 flex flex-col gap-8 justify-center items-center lg:flex-row-reverse"
+  >
+    <Image
+      src={image ? directusFileURL(image) : '/assets/img/partners.png'}
+      alt="partners"
+      width={273}
+      height={255}
+      loading="lazy"
+      class="w-full h-auto sm:w-[273px]"
+    />
+
+    <div class="flex flex-col gap-8">
+      <h2 class="text-white text-2xl md:w-full lg:text-4xl" set:html={title} />
+
+      <div
+        class="text-white [&_ul]:list-disc [&_*]:text-sm [&_ul]:pl-4 sm:w-[280px] md:w-full [&_*]:lg:text-xl"
+        set:html={body}
+      />
+    </div>
+  </div>
+</div>

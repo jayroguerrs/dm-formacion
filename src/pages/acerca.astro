@@ -1,0 +1,121 @@
+---
+import AccordionItem from '@/components/accordion-item.astro';
+import Accordion from '@/components/accordion.astro';
+import Breadcrumb from '@/components/breadcrumb.astro';
+import Layout from '@/layouts/root.layout.astro';
+import { WYSIWYG_CLASSES } from '@/utils/constants';
+import type { TitleBodyBlock } from '@/utils/directus';
+import { directusFileURL } from '@/utils/directus';
+import { directus, type About_TitleBodyBlock } from '@/utils/directus';
+import { readItems, readSingleton } from '@directus/sdk';
+import { Image } from 'astro:assets';
+import SEO from '@/components/seo.astro';
+
+const about = await directus.request(
+  readSingleton('about', { fields: ['*', { faq: ['*'] }] })
+);
+
+const faq = await directus.request(
+  readItems('titleBodyBlock', {
+    fields: ['*'],
+    filter: {
+      id: {
+        _in: (about.faq as About_TitleBodyBlock[]).map(
+          ({ titleBodyBlock_id }) => titleBodyBlock_id as number
+        ),
+      },
+    },
+  })
+);
+---
+
+<style is:global>
+  .faq-accordion {
+    & .accordion__panel {
+      background-color: white !important;
+    }
+  }
+</style>
+
+<SEO title="Acerca de DM" />
+
+<Layout>
+  <Breadcrumb
+    items={[
+      { text: 'Home', url: '/', icon: '/assets/home.icon.svg' },
+      { text: 'Acerca de DM' },
+    ]}
+  />
+  <div class="grid grid-rows-[auto_auto_1fr] gap-4 h-full">
+    <div class="relative w-full">
+      <Image
+        src={directusFileURL(about.image)}
+        alt="Acerca de DM"
+        width={700}
+        height={400}
+        loading="eager"
+        class="object-cover w-full h-full absolute top-0 left-0 -z-[1]"
+      />
+      <div
+        class="bg-secondary/[0.9] w-full h-full absolute top-0 left-0 -z-[1]"
+      >
+      </div>
+      <div class="px-4 py-8 flex flex-col gap-4 container mx-auto">
+        <button
+          onclick="window.history.back()"
+          class="flex gap-4 items-center text-white text-sm"
+        >
+          <Image
+            src="/assets/chevron-left.icon.svg"
+            alt="back"
+            width="9"
+            height="17"
+            loading="eager"
+          />
+          <span>Ir atrás</span>
+        </button>
+        <h1 class="text-white text-3xl px-4 lg:text-4xl">
+          Acerca de<br /><strong>DM Formación</strong>
+        </h1>
+      </div>
+    </div>
+
+    <div class="container px-4 py-8 mx-auto flex flex-col gap-4">
+      <div
+        class:list={[WYSIWYG_CLASSES, 'text-center']}
+        set:html={about.body}
+      />
+    </div>
+
+    <div
+      class="bg-secondary/[0.03] w-full h-full py-4 relative overflow-hidden"
+    >
+      <span
+        class="rounded-full bg-[#F5F6F7] w-[352px] h-[352px] absolute left-[-42px] top-[72px] -z-[1]"
+      ></span>
+      <span
+        class="rounded-full bg-[#9EA5AC] w-[150px] h-[150px] absolute right-[-75px] top-[128px] opacity-[0.1]"
+      ></span>
+      <Image
+        src="/assets/img/events-dots.svg"
+        alt="dots"
+        width="224"
+        height="224"
+        class="absolute right-[-80px] bottom-[50px] w-[224px] h-[224px]"
+      />
+      <div
+        class="container px-4 lg:max-w-3xl mx-auto relative py-12 faq-accordion"
+      >
+        <Accordion>
+          {
+            ((faq || []) as TitleBodyBlock[]).map(item => (
+              <AccordionItem header={item.title}>
+                <div set:html={item.body} class:list={[WYSIWYG_CLASSES]} />
+              </AccordionItem>
+            ))
+          }
+        </Accordion>
+      </div>
+    </div>
+  </div>
+</Layout>

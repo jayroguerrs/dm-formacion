@@ -1,0 +1,1236 @@
+---
+import DMDialog from './dm-dialog.astro';
+import Spinner from './spinner.astro';
+interface Props {
+  whatsappNumber: string;
+}
+const { whatsappNumber } = Astro.props;
+const recaptchaKey = import.meta.env.RECAPTCHA_KEY;
+const changePasswordLink = import.meta.env.CHANGE_PASSWORD_LINK;
+const devMode = import.meta.env.MODE === 'development';
+---
+
+<script
+  src={`https://www.google.com/recaptcha/api.js?render=${recaptchaKey}`}
+  async
+  defer></script>
+
+{
+  devMode ? (
+    <script src="https://sandbox-checkout.izipay.pe/payments/v1/js/index.js" />
+  ) : (
+    <script src="https://checkout.izipay.pe/payments/v1/js/index.js" />
+  )
+}
+
+<inscription-flow data-whatsapp={whatsappNumber} data-recaptcha={recaptchaKey}>
+  <!-- DNI -->
+  <DMDialog id="step1">
+    <form class="flex flex-col items-center justify-center gap-4">
+      <!-- <div class="uppercase text-dm-gray-4 text-xs text-center">
+        Paso 1 de 4
+      </div> -->
+      <div class="text-secondary font-bold text-xl text-center">
+        Inscríbete ingresando tu Documento de Identidad
+      </div>
+      <div class="w-full">
+        <input
+          type="text"
+          name="document"
+          placeholder="Documento de Identidad"
+          class="w-full text-dm-gray-6 placeholder:text-dm-gray-6 bg-dm-gray-5/80 rounded-lg text-lg p-4"
+        />
+        <span class="text-xs text-red-500 error-message"></span>
+      </div>
+
+      <p class="text-sm text-dm-gray-7 text-center">
+        Tu documento de identidad servirá para que ingreses al aula virtual o
+        registres tu participación en otros eventos o cursos de DM Formación
+      </p>
+
+      <div class="actions flex gap-4 items-center justify-center">
+        <button
+          class="bg-secondary text-white rounded-lg px-4 py-2 border border-transparent hover:bg-primary hover:border-primary"
+          type="submit"
+        >
+          Continuar
+        </button>
+      </div>
+      <Spinner class="hidden" />
+    </form>
+  </DMDialog>
+
+  <!-- New Password -->
+  <DMDialog id="step2">
+    <form class="flex flex-col items-center justify-center gap-4">
+      <!-- <div class="uppercase text-dm-gray-4 text-xs text-center">
+        Paso 2 de 4
+      </div> -->
+      <div class="text-secondary font-bold text-xl text-center">
+        Registra tu contraseña
+      </div>
+      <div class="w-full">
+        <input
+          type="password"
+          name="password"
+          placeholder="Contraseña"
+          class="w-full text-dm-gray-6 placeholder:text-dm-gray-6 bg-dm-gray-5/80 rounded-lg text-lg p-4"
+        />
+        <span class="text-xs text-red-500 error-message"></span>
+      </div>
+      <div class="w-full">
+        <input
+          type="password"
+          name="repeatPassword"
+          placeholder="Repite la Contraseña"
+          class="w-full text-dm-gray-6 placeholder:text-dm-gray-6 bg-dm-gray-5/80 rounded-lg text-lg p-4"
+        />
+        <span class="text-xs text-red-500 error-message"></span>
+      </div>
+      <p class="text-sm text-dm-gray-7 text-center">
+        Utiliza un mínimo de 6 caracteres (distingue minúsculas de mayúsculas)
+      </p>
+
+      <div class="flex gap-4">
+        <button
+          id="step2back"
+          class="text-secondary border border-secondary rounded-lg px-4 py-2 hover:text-primary hover:border-primary"
+          type="button"
+        >
+          Ir atrás
+        </button>
+        <button
+          class="bg-secondary text-white rounded-lg px-4 py-2 border border-transparent hover:bg-primary hover:border-primary"
+          type="submit"
+        >
+          Continuar
+        </button>
+      </div>
+    </form>
+  </DMDialog>
+
+  <!-- Contact Info -->
+  <DMDialog id="step3">
+    <form class="flex flex-col items-center justify-center gap-4">
+      <!-- <div class="uppercase text-dm-gray-4 text-xs text-center">
+        Paso 3 de 4
+      </div> -->
+      <div class="text-secondary font-bold text-xl text-center">
+        Registre sus datos de contacto
+      </div>
+      <div class="w-full">
+        <input
+          type="text"
+          name="firstName"
+          placeholder="Nombres"
+          class="w-full text-dm-gray-6 placeholder:text-dm-gray-6 bg-dm-gray-5/80 rounded-lg text-lg p-4"
+        />
+        <span class="text-xs text-red-500 error-message"></span>
+      </div>
+      <div class="w-full">
+        <input
+          type="text"
+          name="lastName"
+          placeholder="Apellidos"
+          class="w-full text-dm-gray-6 placeholder:text-dm-gray-6 bg-dm-gray-5/80 rounded-lg text-lg p-4"
+        />
+        <span class="text-xs text-red-500 error-message"></span>
+      </div>
+      <div class="w-full">
+        <input
+          type="email"
+          name="email"
+          placeholder="Correo electrónico"
+          class="w-full text-dm-gray-6 placeholder:text-dm-gray-6 bg-dm-gray-5/80 rounded-lg text-lg p-4"
+        />
+        <span class="text-xs text-red-500 error-message"></span>
+      </div>
+      <div class="w-full">
+        <input
+          type="text"
+          name="phone"
+          placeholder="Teléfono"
+          class="w-full text-dm-gray-6 placeholder:text-dm-gray-6 bg-dm-gray-5/80 rounded-lg text-lg p-4"
+        />
+        <span class="text-xs text-red-500 error-message"></span>
+      </div>
+      <p class="text-sm text-dm-gray-7 text-center">
+        Sus nombres y apellidos son importantes para la emisión de sus
+        certificados o constancia. Regístrenlos tal cual aparecen en su DNI
+      </p>
+
+      <div class="flex gap-4 actions">
+        <button
+          id="step3back"
+          class="text-secondary border border-secondary rounded-lg px-4 py-2 hover:text-primary hover:border-primary"
+          type="button"
+        >
+          Ir atrás
+        </button>
+        <button
+          class="bg-secondary text-white rounded-lg px-4 py-2 border border-transparent hover:bg-primary hover:border-primary"
+          type="submit"
+        >
+          Continuar
+        </button>
+      </div>
+      <Spinner class="hidden" />
+    </form>
+  </DMDialog>
+
+  <!-- Whatsapp -->
+  <!-- <DMDialog id="izipayDialog">
+    <div class="flex flex-col items-center justify-center gap-4">
+      <div class="text-secondary font-bold text-xl text-center">
+        Contáctanos para continuar con su inscripción
+      </div>
+      <div class="uppercase text-dm-gray-4 text-xs text-center">
+        Haga click en el logo de Whatsapp para contactarse con nuestros acesores
+      </div>
+      <a href={`https://wa.me/${whatsappNumber}`} target="_blank">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="48"
+          height="48.375"
+          viewBox="0 0 256 258"
+          ><defs
+            ><linearGradient
+              id="IconifyId1919fddd1c19f55862"
+              x1="50%"
+              x2="50%"
+              y1="100%"
+              y2="0%"
+              ><stop offset="0%" stop-color="#1FAF38"></stop><stop
+                offset="100%"
+                stop-color="#60D669"></stop></linearGradient
+            ><linearGradient
+              id="IconifyId1919fddd1c19f55863"
+              x1="50%"
+              x2="50%"
+              y1="100%"
+              y2="0%"
+              ><stop offset="0%" stop-color="#F9F9F9"></stop><stop
+                offset="100%"
+                stop-color="#FFF"></stop></linearGradient
+            ></defs
+          ><path
+            fill="url(#IconifyId1919fddd1c19f55862)"
+            d="M5.463 127.456c-.006 21.677 5.658 42.843 16.428 61.499L4.433 252.697l65.232-17.104a123 123 0 0 0 58.8 14.97h.054c67.815 0 123.018-55.183 123.047-123.01c.013-32.867-12.775-63.773-36.009-87.025c-23.23-23.25-54.125-36.061-87.043-36.076c-67.823 0-123.022 55.18-123.05 123.004"
+          ></path><path
+            fill="url(#IconifyId1919fddd1c19f55863)"
+            d="M1.07 127.416c-.007 22.457 5.86 44.38 17.014 63.704L0 257.147l67.571-17.717c18.618 10.151 39.58 15.503 60.91 15.511h.055c70.248 0 127.434-57.168 127.464-127.423c.012-34.048-13.236-66.065-37.3-90.15C194.633 13.286 162.633.014 128.536 0C58.276 0 1.099 57.16 1.071 127.416m40.24 60.376l-2.523-4.005c-10.606-16.864-16.204-36.352-16.196-56.363C22.614 69.029 70.138 21.52 128.576 21.52c28.3.012 54.896 11.044 74.9 31.06c20.003 20.018 31.01 46.628 31.003 74.93c-.026 58.395-47.551 105.91-105.943 105.91h-.042c-19.013-.01-37.66-5.116-53.922-14.765l-3.87-2.295l-40.098 10.513z"
+          ></path><path
+            fill="#FFF"
+            d="M96.678 74.148c-2.386-5.303-4.897-5.41-7.166-5.503c-1.858-.08-3.982-.074-6.104-.074c-2.124 0-5.575.799-8.492 3.984c-2.92 3.188-11.148 10.892-11.148 26.561s11.413 30.813 13.004 32.94c1.593 2.123 22.033 35.307 54.405 48.073c26.904 10.609 32.379 8.499 38.218 7.967c5.84-.53 18.844-7.702 21.497-15.139c2.655-7.436 2.655-13.81 1.859-15.142c-.796-1.327-2.92-2.124-6.105-3.716s-18.844-9.298-21.763-10.361c-2.92-1.062-5.043-1.592-7.167 1.597c-2.124 3.184-8.223 10.356-10.082 12.48c-1.857 2.129-3.716 2.394-6.9.801c-3.187-1.598-13.444-4.957-25.613-15.806c-9.468-8.442-15.86-18.867-17.718-22.056c-1.858-3.184-.199-4.91 1.398-6.497c1.431-1.427 3.186-3.719 4.78-5.578c1.588-1.86 2.118-3.187 3.18-5.311c1.063-2.126.531-3.986-.264-5.579c-.798-1.593-6.987-17.343-9.819-23.64"
+          ></path></svg
+        ></a
+      >
+    </div>
+  </DMDialog> -->
+
+  <!-- Billing Address -->
+  <DMDialog id="billingAddressDialog">
+    <form class="flex flex-col items-center justify-center gap-4">
+      <div class="text-secondary font-bold text-xl text-center">
+        Ingresa o confirma tus datos para el pago online
+      </div>
+      <input type="hidden" name="userId" />
+      <div class="w-full">
+        <input
+          type="text"
+          name="firstName"
+          placeholder="Nombres"
+          class="w-full text-dm-gray-6 placeholder:text-dm-gray-6 bg-dm-gray-5/80 rounded-lg text-lg p-4"
+        />
+        <span class="text-xs text-red-500 error-message"></span>
+      </div>
+      <div class="w-full">
+        <input
+          type="text"
+          name="lastName"
+          placeholder="Apellidos"
+          class="w-full text-dm-gray-6 placeholder:text-dm-gray-6 bg-dm-gray-5/80 rounded-lg text-lg p-4"
+        />
+        <span class="text-xs text-red-500 error-message"></span>
+      </div>
+      <div class="w-full">
+        <input
+          type="email"
+          name="email"
+          placeholder="Correo electrónico"
+          class="w-full text-dm-gray-6 placeholder:text-dm-gray-6 bg-dm-gray-5/80 rounded-lg text-lg p-4"
+        />
+        <span class="text-xs text-red-500 error-message"></span>
+      </div>
+      <div class="w-full">
+        <input
+          type="text"
+          name="phoneNumber"
+          placeholder="Número de teléfono"
+          class="w-full text-dm-gray-6 placeholder:text-dm-gray-6 bg-dm-gray-5/80 rounded-lg text-lg p-4"
+        />
+        <span class="text-xs text-red-500 error-message"></span>
+      </div>
+      <div class="w-full">
+        <select
+          name="documentType"
+          class="w-full text-dm-gray-6 placeholder:text-dm-gray-6 bg-dm-gray-5/80 rounded-lg text-lg p-4 appearance-none bg-select bg-size-select bg-no-repeat bg-position-select"
+        >
+          <option value="" disabled selected>Tipo de Documento</option>
+          <option value="DNI">DNI</option>
+          <option value="CE">CE</option>
+          <option value="PASAPORTE">PASAPORTE</option>
+          <option value="RUC">RUC</option>
+          <option value="OTROS">OTROS</option>
+        </select>
+        <span class="text-xs text-red-500 error-message"></span>
+      </div>
+      <div class="w-full">
+        <input
+          type="text"
+          name="document"
+          placeholder="Número de Documento"
+          class="w-full text-dm-gray-6 placeholder:text-dm-gray-6 bg-dm-gray-5/80 rounded-lg text-lg p-4"
+        />
+        <span class="text-xs text-red-500 error-message"></span>
+      </div>
+      <div class="w-full hidden">
+        <input
+          type="text"
+          name="companyName"
+          placeholder="Razón Social"
+          class="w-full text-dm-gray-6 placeholder:text-dm-gray-6 bg-dm-gray-5/80 rounded-lg text-lg p-4"
+        />
+        <span class="text-xs text-red-500 error-message"></span>
+      </div>
+      <div class="w-full">
+        <input
+          type="text"
+          name="street"
+          placeholder="Dirección"
+          class="w-full text-dm-gray-6 placeholder:text-dm-gray-6 bg-dm-gray-5/80 rounded-lg text-lg p-4"
+        />
+        <span class="text-xs text-red-500 error-message"></span>
+      </div>
+      <div class="w-full">
+        <select
+          name="state"
+          class="w-full text-dm-gray-6 placeholder:text-dm-gray-6 bg-dm-gray-5/80 rounded-lg text-lg p-4"
+        >
+          <option value="" disabled selected>Departamento</option>
+        </select>
+        <span class="text-xs text-red-500 error-message"></span>
+      </div>
+      <div class="w-full">
+        <select
+          name="city"
+          class="w-full text-dm-gray-6 placeholder:text-dm-gray-6 bg-dm-gray-5/80 rounded-lg text-lg p-4"
+        >
+          <option value="" disabled selected>Provincia</option>
+        </select>
+        <span class="text-xs text-red-500 error-message"></span>
+      </div>
+      <div class="w-full">
+        <input
+          type="text"
+          name="postalCode"
+          placeholder="Código Postal"
+          class="w-full text-dm-gray-6 placeholder:text-dm-gray-6 bg-dm-gray-5/80 rounded-lg text-lg p-4"
+        />
+        <span class="text-xs text-red-500 error-message"></span>
+      </div>
+
+      <div class="actions flex gap-4 items-center justify-center">
+        <button
+          class="bg-secondary text-white rounded-lg px-4 py-2 border border-transparent hover:bg-primary hover:border-primary"
+          type="submit"
+        >
+          Siguiente
+        </button>
+      </div>
+      <Spinner class="hidden" />
+    </form>
+  </DMDialog>
+
+  <!-- Izipay -->
+  <DMDialog id="izipayDialog">
+    <div id="izipay-container"></div>
+  </DMDialog>
+
+  <!-- Izipay Response -->
+  <DMDialog id="izipayResponseDialog">
+    <div
+      id="payment-loading"
+      class="flex flex-col items-center justify-center gap-4"
+    >
+      <div class="text-secondary font-bold text-lg text-center">
+        Estamos procesando su pago, por favor espere unos segundos
+      </div>
+      <Spinner />
+    </div>
+    <div
+      id="payment-success"
+      class="flex flex-col items-center justify-center gap-4"
+    >
+      <div class="text-secondary font-bold text-lg text-center">
+        Pago exitoso, pronto le enviaremos un correo electrónico confirmando los
+        detalles de su matrícula
+      </div>
+    </div>
+    <div
+      id="payment-error"
+      class="flex flex-col items-center justify-center gap-4"
+    >
+      <div class="text-secondary font-bold text-lg text-center"></div>
+    </div>
+  </DMDialog>
+
+  <!-- Password -->
+  <DMDialog id="step5">
+    <form class="flex flex-col items-center justify-center gap-4">
+      <div class="text-secondary font-bold text-xl text-center">
+        Ingresa tu contraseña
+      </div>
+      <div class="w-full">
+        <input
+          type="password"
+          name="password"
+          placeholder="Contraseña"
+          class="w-full text-dm-gray-6 placeholder:text-dm-gray-6 bg-dm-gray-5/80 rounded-lg text-lg p-4"
+        />
+        <span class="text-xs text-red-500 error-message"></span>
+      </div>
+      <div class="w-full flex justify-center">
+        <button
+          id="forgot-password-button"
+          type="button"
+          class="text-secondary text-sm hidden"
+          >¿No recuerdas tu contraseña?</button
+        >
+        <a
+          id="forgot-password-link"
+          href={changePasswordLink}
+          target="_blank"
+          class="text-secondary text-sm hidden">¿No recuerdas tu contraseña?</a
+        >
+      </div>
+      <div class="actions flex gap-4 items-center justify-center">
+        <button
+          id="step5back"
+          class="text-secondary border border-secondary rounded-lg px-4 py-2 hover:text-primary hover:border-primary"
+          type="button"
+        >
+          Ir atrás
+        </button>
+        <button
+          class="bg-secondary text-white rounded-lg px-4 py-2 border border-transparent hover:bg-primary hover:border-primary"
+          type="submit"
+        >
+          Continuar
+        </button>
+      </div>
+      <Spinner class="hidden" />
+    </form>
+  </DMDialog>
+
+  <!-- Update Password -->
+  <DMDialog id="step6">
+    <form class="flex flex-col items-center justify-center gap-4">
+      <div class="text-secondary font-bold text-xl text-center">
+        Debe actualizar su clave digital
+      </div>
+
+      <div class="w-full flex justify-center">
+        <a
+          href={changePasswordLink}
+          target="_blank"
+          class="text-secondary text-sm"
+          >Dirigirse al portal de Operaciones en Línea</a
+        >
+      </div>
+    </form>
+  </DMDialog>
+
+  <!-- Already Subscribed -->
+  <DMDialog id="errorDialog">
+    <div class="flex flex-col items-center justify-center gap-4">
+      <div
+        class="text-secondary font-bold text-lg text-center"
+        id="error-dialog-message"
+      >
+      </div>
+    </div>
+  </DMDialog>
+</inscription-flow>
+
+<script>
+  import type { IzipayResponse } from '@/utils/izipay';
+  import { isInputError } from 'astro:actions';
+  import { actions } from 'astro:actions';
+
+  class InscriptionFlow extends HTMLElement {
+    courseId: string = '';
+    courseName: string = '';
+    whatsappNumber: string = '';
+    recaptchaKey: string = '';
+
+    buttons: NodeListOf<Element>;
+    dialog1: HTMLDialogElement | null = null;
+    dialog2: HTMLDialogElement | null = null;
+    dialog3: HTMLDialogElement | null = null;
+    billingAddressDialog: HTMLDialogElement | null = null;
+    izipayDialog: HTMLDialogElement | null = null;
+    izipayResponseDialog: HTMLDialogElement | null = null;
+    dialog5: HTMLDialogElement | null = null;
+    dialog6: HTMLDialogElement | null = null;
+    errorDialog: HTMLDialogElement | null = null;
+
+    forgotPasswordButton: HTMLButtonElement | null = null;
+    forgotPasswordLink: HTMLAnchorElement | null = null;
+
+    user = {
+      userId: '',
+      document: '',
+      password: '',
+      firstName: '',
+      lastName: '',
+      email: '',
+      phone: '',
+      type: '',
+      exists: false,
+      courses: [] as {
+        id: string;
+        directus_users_id: string;
+        internalCourse_id: string;
+      }[],
+      billingAddressDocumentType: '',
+      billingAddressDocument: '',
+      street: '',
+      state: '',
+      city: '',
+      postalCode: '',
+      companyName: '',
+    };
+
+    billingData = {
+      firstName: '',
+      lastName: '',
+      email: '',
+      phoneNumber: '',
+      street: '',
+      city: '',
+      state: '',
+      country: '',
+      postalCode: '',
+      document: '',
+      documentType: '',
+      companyName: '' as string | undefined,
+    };
+
+    orderNumber: string = '';
+
+    constructor() {
+      super();
+
+      this.whatsappNumber = this.dataset.whatsapp || '';
+      this.recaptchaKey = this.dataset.recaptcha || '';
+
+      this.buttons = document.querySelectorAll(
+        'button[data-course-id][data-action="inscription"]'
+      );
+      this.buttons.forEach(button =>
+        button.addEventListener('click', this.triggerInscriptions.bind(this))
+      );
+
+      this.dialog1 = this.querySelector('#step1');
+      this.dialog2 = this.querySelector('#step2');
+      this.dialog3 = this.querySelector('#step3');
+      this.billingAddressDialog = this.querySelector('#billingAddressDialog');
+      this.izipayDialog = this.querySelector('#izipayDialog');
+      this.izipayResponseDialog = this.querySelector('#izipayResponseDialog');
+      this.dialog5 = this.querySelector('#step5');
+      this.dialog6 = this.querySelector('#step6');
+      this.errorDialog = this.querySelector('#errorDialog');
+
+      //@ts-ignore
+      this.querySelector('#step1 form')?.addEventListener(
+        'submit',
+        this.onSubmitStep1.bind(this)
+      );
+      //@ts-ignore
+      this.querySelector('#step2 form')?.addEventListener(
+        'submit',
+        this.onSubmitStep2.bind(this)
+      );
+      //@ts-ignore
+      this.querySelector('#step3 form')?.addEventListener(
+        'submit',
+        this.onSubmitStep3.bind(this)
+      );
+      //@ts-ignore
+      this.querySelector('#step5 form')?.addEventListener(
+        'submit',
+        this.onSubmitStep5.bind(this)
+      );
+      //@ts-ignore
+      this.querySelector('#billingAddressDialog form')?.addEventListener(
+        'submit',
+        this.onSubmitBillingAddressDialog.bind(this)
+      );
+
+      this.querySelector('#step2back')?.addEventListener(
+        'click',
+        this.onBack.bind(this)
+      );
+      this.querySelector('#step3back')?.addEventListener(
+        'click',
+        this.onBack.bind(this)
+      );
+      this.querySelector('#step5back')?.addEventListener(
+        'click',
+        this.onBack.bind(this)
+      );
+
+      [this.dialog1, this.dialog2, this.dialog3, this.dialog5].forEach(
+        dialog => {
+          dialog?.addEventListener('close', () => {
+            const form = dialog?.querySelector('form');
+            if (form) form.reset();
+          });
+        }
+      );
+      this.forgotPasswordLink = this.querySelector('#forgot-password-link');
+      this.forgotPasswordButton = this.querySelector('#forgot-password-button');
+      this.forgotPasswordButton?.addEventListener(
+        'click',
+        this.onForgotPassword.bind(this)
+      );
+
+      this.izipayDialog?.addEventListener(
+        'close',
+        this.onIzipayClose.bind(this)
+      );
+    }
+
+    async triggerInscriptions(e: Event) {
+      this.courseId =
+        (e.currentTarget as HTMLButtonElement).getAttribute('data-course-id') ||
+        '';
+      this.courseName =
+        (e.currentTarget as HTMLButtonElement).getAttribute(
+          'data-course-name'
+        ) || '';
+      this.clearErrors(this.dialog1!);
+      this.dialog1?.showModal();
+    }
+
+    onBack(e: Event) {
+      const id = (e.currentTarget as HTMLElement)?.getAttribute('id');
+
+      if (id === 'step2back') {
+        this.dialog2?.close();
+        this.dialog1?.showModal();
+      } else if (id === 'step3back') {
+        this.dialog3?.close();
+        this.dialog2?.showModal();
+      } else if (id === 'step5back') {
+        this.dialog5?.close();
+        this.dialog1?.showModal();
+      }
+    }
+
+    getRecaptchaToken(): Promise<string> {
+      return new Promise(resolve => {
+        //@ts-ignore
+        grecaptcha.ready(async () => {
+          //@ts-ignore
+          const token: string = await grecaptcha.execute(this.recaptchaKey, {
+            action: 'submit',
+          });
+          resolve(token);
+        });
+      });
+    }
+
+    async onSubmitStep1(e: SubmitEvent) {
+      e.preventDefault();
+      this.setLoading(this.dialog1!, true);
+      this.clearErrors(this.dialog1!);
+      const token = await this.getRecaptchaToken();
+
+      const formData = new FormData(e.target as HTMLFormElement);
+      formData.append('recaptcha', token);
+      const { data, error } = await actions.validateDocument(formData);
+      this.setLoading(this.dialog1!, false);
+
+      if (error) {
+        if (isInputError(error)) {
+          this.showErrors(this.dialog1!, error.fields);
+        } else {
+          this.showServerError(this.dialog1!, error.message);
+        }
+        return;
+      }
+
+      this.user.document = data?.document || '';
+      this.user.type = data?.type || '';
+      this.user.firstName = data?.firstName || '';
+      this.user.lastName = data?.lastName || '';
+      this.user.email = data?.email || '';
+      this.user.phone = data?.phone || '';
+      this.user.exists = data?.exists || false;
+      this.user.billingAddressDocumentType = '';
+      this.user.billingAddressDocument = '';
+      this.user.street = '';
+      this.user.state = '';
+      this.user.city = '';
+      this.user.postalCode = '';
+      this.user.companyName = '';
+
+      this.dialog1?.close();
+      if (data?.shouldUpdatePassword) {
+        this.clearErrors(this.dialog6!);
+        this.dialog6?.showModal();
+        return;
+      }
+      if (this.user.type === 'EXTERNO' && !this.user.exists) {
+        this.clearErrors(this.dialog2!);
+        this.dialog2?.showModal();
+      } else {
+        this.clearErrors(this.dialog5!);
+        this.dialog5?.showModal();
+      }
+
+      if (this.user.type === 'EXTERNO') {
+        this.forgotPasswordButton?.classList.remove('hidden');
+        this.forgotPasswordLink?.classList.add('hidden');
+      } else {
+        this.forgotPasswordButton?.classList.add('hidden');
+        this.forgotPasswordLink?.classList.remove('hidden');
+      }
+    }
+
+    async onSubmitStep2(e: SubmitEvent) {
+      e.preventDefault();
+      const formData = new FormData(e.currentTarget as HTMLFormElement);
+      const { data, error } = await actions.validatePassword(formData);
+      this.clearErrors(this.dialog2!);
+
+      if (error) {
+        if (isInputError(error)) {
+          this.showErrors(this.dialog2!, error.fields);
+        } else if (error.code === 'BAD_REQUEST') {
+          this.showErrors(this.dialog2!, {
+            repeatPassword: [error.message],
+          });
+        }
+        return;
+      }
+      this.dialog2?.close();
+
+      if (!!data.password) {
+        this.user.password = data.password;
+        this.clearErrors(this.dialog3!);
+        this.dialog3?.showModal();
+        return;
+      }
+    }
+
+    async onSubmitStep3(e: SubmitEvent) {
+      e.preventDefault();
+      this.setLoading(this.dialog3!, true);
+      this.clearErrors(this.dialog3!);
+      const formData = new FormData(e.currentTarget as HTMLFormElement);
+      formData.append('document', this.user.document);
+      formData.append('password', this.user.password);
+      const { data, error } = await actions.createExternalUser(formData);
+
+      this.setLoading(this.dialog3!, false);
+
+      if (error) {
+        if (isInputError(error)) {
+          this.showErrors(this.dialog3!, error.fields);
+        } else {
+          this.showServerError(this.dialog3!, error.message);
+        }
+        return;
+      }
+      this.dialog3?.close();
+
+      if (!!data.user) {
+        this.user.userId = data.user.userId;
+        this.user.firstName = data.user.firstName;
+        this.user.lastName = data.user.lastName;
+        this.user.email = data.user.email;
+        this.user.phone = data.user.phone;
+        this.user.courses = [];
+        this.user.type = data.user.type;
+        this.user.billingAddressDocumentType =
+          data.user.billingAddressDocumentType;
+        this.user.billingAddressDocument = data.user.billingAddressDocument;
+        this.user.street = data.user.street;
+        this.user.state = data.user.state;
+        this.user.city = data.user.city;
+        this.user.postalCode = data.user.postalCode;
+        this.user.companyName = data.user.companyName;
+
+        const { data: dataValidateEnroll, error: errorValidateEnroll } =
+          await actions.validateEnroll({
+            userId: this.user.userId,
+            courseId: this.courseId,
+          });
+
+        if (errorValidateEnroll) {
+          this.showErrorDialog(errorValidateEnroll.message);
+          return;
+        }
+
+        await this.setupBillingAddressDialog();
+        this.billingAddressDialog?.showModal();
+      }
+    }
+
+    async onSubmitStep5(e: SubmitEvent) {
+      e.preventDefault();
+      this.setLoading(this.dialog5!, true);
+      this.clearErrors(this.dialog5!);
+      const token = await this.getRecaptchaToken();
+      const formData = new FormData(e.target as HTMLFormElement);
+      formData.append('document', this.user.document);
+      formData.append('type', this.user.type);
+      formData.append('recaptcha', token);
+      formData.append('exists', this.user.exists.toString());
+      if (!this.user.exists) {
+        formData.append('firstName', this.user.firstName);
+        formData.append('lastName', this.user.lastName);
+        formData.append('email', this.user.email);
+        formData.append('phone', this.user.phone);
+      }
+
+      const { data, error } = await actions.login(formData);
+
+      this.setLoading(this.dialog5!, false);
+
+      if (error) {
+        if (isInputError(error)) {
+          this.showErrors(this.dialog5!, error.fields);
+        } else {
+          this.showServerError(this.dialog5!, error.message);
+        }
+        return;
+      }
+      this.dialog5?.close();
+
+      if (!!data.user) {
+        this.user.userId = data.user.userId;
+        this.user.firstName = data.user.firstName!;
+        this.user.lastName = data.user.lastName!;
+        this.user.email = data.user.email || '';
+        this.user.phone = data.user.phone || '';
+        //@ts-ignore
+        this.user.courses = data.user.courses;
+        this.user.type = data.user.type;
+        this.user.billingAddressDocumentType =
+          data.user.billingAddressDocumentType;
+        this.user.billingAddressDocument = data.user.billingAddressDocument;
+        this.user.street = data.user.street;
+        this.user.state = data.user.state;
+        this.user.city = data.user.city;
+        this.user.postalCode = data.user.postalCode;
+        this.user.companyName = data.user.companyName;
+
+        const { data: dataValidateEnroll, error: errorValidateEnroll } =
+          await actions.validateEnroll({
+            userId: this.user.userId,
+            courseId: this.courseId,
+          });
+
+        if (errorValidateEnroll) {
+          this.showErrorDialog(errorValidateEnroll.message);
+          return;
+        }
+
+        await this.setupBillingAddressDialog();
+        this.billingAddressDialog?.showModal();
+      }
+    }
+
+    async onForgotPassword(e: MouseEvent) {
+      this.clearErrors(this.dialog5!);
+      this.setLoading(this.dialog5!, true);
+      const formData = new FormData();
+      formData.append('document', this.user.document);
+      const { data, error } = await actions.forgotPassword(formData);
+      this.setLoading(this.dialog5!, false);
+      if (error) {
+        if (isInputError(error)) {
+          this.showErrors(this.dialog5!, error.fields);
+        } else {
+          this.showServerError(this.dialog5!, error.message);
+        }
+      }
+
+      if (data?.success) {
+        const successBanner = this.dialog5?.querySelector('.server-success');
+        if (successBanner) {
+          successBanner.innerHTML =
+            'Hemos recibido tu solicitud, recibirás un correco electrónico con el siguiente paso';
+          successBanner?.classList.remove('hidden');
+        }
+      }
+    }
+
+    showErrors(
+      dialog: HTMLDialogElement,
+      errors: { [field: string]: string[] | undefined }
+    ) {
+      Object.entries(errors).forEach(([name, messages]) => {
+        const errorField = dialog
+          .querySelector(`[name="${name}"]`)
+          ?.parentElement?.querySelector('.error-message');
+        if (errorField && messages && messages?.length > 0)
+          errorField.innerHTML = messages[0];
+      });
+    }
+
+    showServerError(dialog: HTMLDialogElement, message: string) {
+      const serverError = dialog.querySelector('.server-error');
+      if (serverError) {
+        serverError.innerHTML = message;
+        serverError.classList.remove('hidden');
+      }
+    }
+
+    clearErrors(dialog: HTMLDialogElement) {
+      dialog
+        .querySelectorAll('.error-message')
+        .forEach(errorField => (errorField.innerHTML = ''));
+
+      dialog.querySelector('.server-error')?.classList.add('hidden');
+
+      dialog.querySelector('.server-success')?.classList.add('hidden');
+    }
+
+    setLoading(dialog: HTMLDialogElement, loading: boolean) {
+      dialog.querySelector('.spinner')?.classList.toggle('hidden', !loading);
+      dialog.querySelector('.actions')?.classList.toggle('hidden', loading);
+    }
+
+    setUpWhatsapp() {
+      const text = `Hola, mi nombre es ${this.user.firstName} ${this.user.lastName}, mi número de documento es ${this.user.document} y deseo inscribirme en el curso ${this.courseName}`;
+
+      const url = `https://wa.me/${this.whatsappNumber}?text=${text}`;
+      this.izipayDialog?.querySelector('a')?.setAttribute('href', url);
+    }
+
+    async onSubmitBillingAddressDialog(e: SubmitEvent) {
+      e.preventDefault();
+      this.setLoading(this.billingAddressDialog!, true);
+      this.clearErrors(this.billingAddressDialog!);
+      const formData = new FormData(e.target as HTMLFormElement);
+
+      const { data, error } = await actions.updateBillingAddress(formData);
+
+      if (error) {
+        this.setLoading(this.billingAddressDialog!, false);
+        if (isInputError(error)) {
+          this.showErrors(this.billingAddressDialog!, error.fields);
+        } else {
+          this.showServerError(this.billingAddressDialog!, error.message);
+        }
+        return;
+      }
+
+      this.billingData.documentType = data.documentType;
+      this.billingData.document = data.document;
+      this.billingData.street = data.street;
+      this.billingData.state = data.state;
+      this.billingData.city = data.city;
+      this.billingData.email = data.email;
+      this.billingData.phoneNumber = data.phoneNumber;
+      this.billingData.companyName = data.companyName || undefined;
+      this.billingData.postalCode = data.postalCode;
+      this.billingData.country = 'PE';
+      this.billingData.firstName = data.firstName;
+      this.billingData.lastName = data.lastName;
+
+      await this.setUpIzipay();
+    }
+
+    async setupBillingAddressDialog() {
+      const ubigeo: { departamentos: { id: string; name: string }[] } =
+        await fetch('/assets/data/ubigeo.json').then(data => data.json());
+      const stateSelect: HTMLSelectElement | null | undefined =
+        this.billingAddressDialog?.querySelector('select[name="state"]');
+
+      if (!!stateSelect) {
+        if (stateSelect.options.length === 1) {
+          ubigeo.departamentos.forEach(departamento => {
+            const option: HTMLOptionElement = document.createElement('option');
+            option.text = departamento.name;
+            option.value = departamento.id;
+            stateSelect.add(option);
+          });
+          stateSelect.addEventListener(
+            'change',
+            this.onStateSelected.bind(this)
+          );
+        }
+        stateSelect.value = '';
+      }
+
+      const documentTypeSelect: HTMLSelectElement | null | undefined =
+        this.billingAddressDialog?.querySelector('select[name="documentType"]');
+
+      if (!!documentTypeSelect) {
+        documentTypeSelect.addEventListener(
+          'change',
+          this.onDocumentTypeSelected.bind(this)
+        );
+      }
+
+      const data = {
+        userId: this.user.userId,
+        firstName: this.user.firstName,
+        lastName: this.user.lastName,
+        email: this.user.email,
+        phoneNumber: this.user.phone,
+        documentType: this.user.billingAddressDocumentType || '',
+        document: this.user.billingAddressDocument || this.user.document,
+        street: this.user.street,
+        state: this.user.state || '',
+        city: this.user.city || '',
+        postalCode: this.user.postalCode,
+        companyName: this.user.companyName,
+      };
+
+      Object.entries(data).forEach(([name, value]) => {
+        const field: HTMLInputElement | HTMLSelectElement | null | undefined =
+          this.billingAddressDialog?.querySelector(`[name="${name}"]`);
+        if (field) {
+          field.value = value;
+
+          if (field.nodeName.toLocaleLowerCase() === 'select') {
+            field.dispatchEvent(new Event('change'));
+          }
+        }
+      });
+    }
+
+    async onDocumentTypeSelected(e: Event) {
+      const companyNameContainer = this.billingAddressDialog?.querySelector(
+        '[name="companyName"]'
+      )?.parentElement;
+
+      if (companyNameContainer) {
+        //@ts-ignore
+        if (e.target?.value === 'RUC') {
+          companyNameContainer.classList.remove('hidden');
+        } else {
+          companyNameContainer.classList.add('hidden');
+        }
+      }
+    }
+
+    async onStateSelected(e: Event) {
+      const ubigeo: {
+        provincias: { id: string; name: string; department_id: string }[];
+      } = await fetch('/assets/data/ubigeo.json').then(data => data.json());
+
+      const citySelect: HTMLSelectElement | null | undefined =
+        this.billingAddressDialog?.querySelector('select[name="city"]');
+
+      if (!!citySelect) {
+        while (citySelect.options.length > 1) {
+          citySelect.remove(citySelect.options.length - 1);
+        }
+
+        //@ts-ignore
+        if (!e.target?.value) return;
+
+        const options = ubigeo.provincias
+          //@ts-ignore
+          .filter(({ department_id }) => department_id === e.target.value);
+
+        options.forEach(provincia => {
+          const option: HTMLOptionElement = document.createElement('option');
+          option.text = provincia.name;
+          option.value = provincia.id;
+          citySelect.add(option);
+        });
+
+        const cityExists = options.find(
+          provincia => provincia.id === this.user.city
+        );
+
+        citySelect.value = !!cityExists ? this.user.city : '';
+      }
+    }
+
+    async setUpIzipay() {
+      try {
+        const { data, error } = await actions.getIzipayPaymentData({
+          courseId: this.courseId,
+          userId: this.user.userId,
+          type: this.user.type,
+        });
+
+        this.orderNumber = data.orderNumber;
+
+        if (error) {
+          console.error(error);
+          throw new Error(
+            'Ocurrió un error. inténtalo nuevamente en unos minutos'
+          );
+        }
+
+        const logoUrl =
+          (document.querySelector('body header h1 > img') as HTMLImageElement)
+            ?.src || '';
+
+        const izipayConfig = {
+          publicKey: data.publicKey,
+          config: {
+            transactionId: data.transactionId,
+            action: 'pay',
+            merchantCode: data.merchantCode,
+            facilitatorCode: data.facilitatorCode,
+            order: {
+              orderNumber: data.orderNumber,
+              currency: data.currency,
+              amount: data.amount,
+              payMethod: 'CARD,QR,YAPE_CODE,APPLE_PAY,PAGO_PUSH',
+              processType: 'AT',
+              merchantBuyerId: this.user.userId,
+              installments: '00',
+              dateTimeTransaction: Math.floor(Date.now()) * 1000,
+            },
+            card: {
+              brand: '',
+              pan: '',
+            },
+            render: {
+              //@ts-ignore
+              typeForm: Izipay.enums.typeForm.EMBEDDED,
+              container: '#izipay-container',
+              showButtonProcessForm: true,
+            },
+            billing: this.billingData,
+            appearance: {
+              logo: logoUrl,
+              theme: 'purple',
+            },
+            urlIPN: data.urlIPN,
+          },
+        };
+
+        if (+data.amount === 0) {
+          this.izipayResponse({
+            code: '00',
+            message: 'No hay pago',
+            messageUser: 'No hay pago, el monto es 0',
+            transactionId: data.transactionId,
+            response: {
+              payMethod: 'none',
+              billing: {
+                firstName: this.billingData.firstName,
+                lastName: this.billingData.lastName,
+                documentType: this.billingData.documentType,
+                document: this.billingData.document,
+                email: this.billingData.email,
+                phoneNumber: this.billingData.phoneNumber,
+                street: this.billingData.street,
+                state: this.billingData.state,
+                city: this.billingData.city,
+                postalCode: this.billingData.postalCode,
+                country: this.billingData.country,
+                companyName: this.billingData.companyName,
+              },
+              order: [
+                {
+                  amount: data.amount,
+                  currency: data.currency,
+                  orderNumber: data.orderNumber,
+                },
+              ],
+            },
+          });
+          this.billingAddressDialog?.close();
+          return;
+        }
+
+        //@ts-ignore
+        const izi = new Izipay(izipayConfig);
+
+        izi &&
+          izi.LoadForm({
+            authorization: data.token,
+            keyRSA: 'RSA',
+            callbackResponse: this.izipayResponse.bind(this),
+          });
+
+        this.setLoading(this.billingAddressDialog!, false);
+        this.billingAddressDialog?.close();
+        this.izipayDialog?.showModal();
+      } catch (error: any) {
+        console.log('ERROR FROM IZIPAY', error);
+      }
+    }
+
+    async izipayResponse(response: IzipayResponse) {
+      this.izipayDialog?.close();
+      this.izipayResponseDialog?.showModal();
+      await this.processPayment(response);
+    }
+
+    async processPayment(izipayData: IzipayResponse) {
+      const loadingElement =
+        this.izipayResponseDialog?.querySelector('#payment-loading')!;
+      const successElement =
+        this.izipayResponseDialog?.querySelector('#payment-success')!;
+      const errorElement =
+        this.izipayResponseDialog?.querySelector('#payment-error')!;
+
+      loadingElement.classList.remove('hidden');
+      successElement.classList.add('hidden');
+      errorElement.classList.add('hidden');
+
+      const { data, error } = await actions.processPayment(izipayData);
+      loadingElement.classList.add('hidden');
+
+      if (error) {
+        if (isInputError(error)) {
+          //@ts-ignore
+          errorElement.querySelector('div').innerHTML =
+            'Tiempo de espera agotado, el pago ha sido cancelado';
+        } else {
+          //@ts-ignore
+          errorElement.querySelector('div').innerHTML = error.message;
+        }
+
+        errorElement.classList.remove('hidden');
+      } else {
+        successElement.classList.remove('hidden');
+      }
+    }
+
+    showErrorDialog(message: string) {
+      const messageElement = this.errorDialog?.querySelector(
+        '#error-dialog-message'
+      );
+      if (!!messageElement) messageElement.innerHTML = message;
+      this.errorDialog?.showModal();
+      return;
+    }
+
+    async onIzipayClose() {
+      const { data, error } = await actions.cancelOrder({
+        orderNumber: this.orderNumber,
+      });
+      if (error) {
+        console.log(error);
+      }
+    }
+  }
+  customElements.define('inscription-flow', InscriptionFlow);
+</script>

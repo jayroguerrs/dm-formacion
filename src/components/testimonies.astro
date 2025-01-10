@@ -1,0 +1,250 @@
+---
+import { directusFileURL } from '@/utils/directus';
+import { Image } from 'astro:assets';
+
+interface Props {
+  config?: {
+    image1?: string;
+    image2?: string;
+    image3?: string;
+    image4?: string;
+    image5?: string;
+    image6?: string;
+  };
+  testimonies: {
+    body: string;
+    author: string;
+    image: string;
+    detail: string;
+  }[];
+}
+
+const { testimonies, config } = Astro.props as Props;
+
+const bgImages = [
+  {
+    image: config?.image1
+      ? directusFileURL(config.image1)
+      : '/assets/img/testimonies/bg-testimonies-5.png',
+    class:
+      'rounded-full overflow-hidden left-[7px] top-[68px] lg:left-[200px] lg:top-0',
+    size: 47,
+    bounceTo: '-10px',
+    time: '10s',
+  },
+  {
+    image: config?.image2
+      ? directusFileURL(config.image2)
+      : '/assets/img/testimonies/bg-testimonies-5.png',
+    class:
+      'rounded-full overflow-hidden -left-[7px] top-[167px] lg:left-[150px] lg:top-[195px]',
+    size: 58,
+    bounceTo: '5px',
+    time: '20s',
+  },
+  {
+    image: config?.image3
+      ? directusFileURL(config.image3)
+      : '/assets/img/testimonies/bg-testimonies-5.png',
+    class:
+      'rounded-full overflow-hidden right-[20px] top-[11px] lg:right-[200px] lg:top-0',
+    size: 60,
+    bounceTo: '-7px',
+    time: '12s',
+  },
+  {
+    image: config?.image4
+      ? directusFileURL(config.image4)
+      : '/assets/img/testimonies/bg-testimonies-5.png',
+    class:
+      'rounded-full overflow-hidden right-[5px] top-[131px] lg:right-[160px] lg:top-[195px]',
+    size: 41,
+    bounceTo: '8px',
+    time: '10s',
+  },
+  {
+    image: config?.image5
+      ? directusFileURL(config.image5)
+      : '/assets/img/testimonies/bg-testimonies-5.png',
+    class:
+      'rounded-full overflow-hidden left-[48px] bottom-[37px] lg:left-[224px] lg:bottom-0',
+    size: 53,
+    bounceTo: '-6px',
+    time: '8s',
+  },
+  {
+    image: config?.image6
+      ? directusFileURL(config.image6)
+      : '/assets/img/testimonies/bg-testimonies-5.png',
+    class:
+      'rounded-full overflow-hidden right-[24px] bottom-[70px] lg:right-[218px] lg:bottom-5',
+    size: 60,
+    bounceTo: '5px',
+    time: '15s',
+  },
+];
+---
+
+<style>
+  .slide {
+    background-image: url('/assets/img/testimonies/quotes.svg');
+    background-repeat: no-repeat;
+    background-position: right 20px bottom 40px;
+    &.index-0 {
+      position: absolute;
+      z-index: 10;
+    }
+    &.index-1 {
+      position: absolute;
+      transform: scale(0.9) translateY(2rem);
+      z-index: 9;
+    }
+    &.index-2 {
+      position: absolute;
+      transform: scale(0.8) translateY(4rem);
+      z-index: 8;
+    }
+
+    &.index-3 {
+      position: absolute;
+      transform: scale(0.7) translateY(6rem);
+      z-index: 7;
+    }
+
+    &.index-4 {
+      position: absolute;
+      transform: scale(0.6) translateY(8rem);
+      z-index: 6;
+    }
+  }
+
+  .bg-testimony {
+    animation: bg-testimony-animation var(--time) linear infinite;
+  }
+
+  @keyframes bg-testimony-animation {
+    0% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(var(--bounce-to));
+    }
+    100% {
+      transform: translateY(0);
+    }
+  }
+</style>
+
+<script>
+  const buttons = document.querySelectorAll('.slide-butotn');
+  buttons.forEach(button => {
+    button.addEventListener('click', e => {
+      const selected: HTMLButtonElement = e.target as HTMLButtonElement;
+      const selectedIndex = +(selected.getAttribute('data-index') || '0');
+      const selectedClass = ['bg-primary', 'hover:bg-primary'];
+      const normalClass = ['bg-primary/20', 'hover:bg-primary/50'];
+      buttons.forEach(button => {
+        button.classList.remove(...selectedClass);
+        button.classList.add(...normalClass);
+      });
+      button.classList.remove(...normalClass);
+      selected.classList.add(...selectedClass);
+
+      const slides = document.querySelectorAll('.slide');
+
+      slides.forEach((slide, index) => {
+        const classesToRemove = [0, 1, 2, 3, 4].map(index => `index-${index}`);
+        slide.classList.remove(...classesToRemove);
+
+        const currentIndex =
+          selectedIndex === index
+            ? 0
+            : selectedIndex < index
+              ? Math.abs(selectedIndex - index)
+              : 5 - Math.abs(selectedIndex - index);
+        slide.classList.add(`index-${currentIndex}`);
+      });
+    });
+  });
+</script>
+
+<div class="bg-[#FBFCFF] py-4">
+  <div class="container mx-auto flex flex-col gap-4">
+    <h2 class="text-secondary font-bold text-center text-xl lg:text-4xl">
+      ¡Ellos ya avanzaron en su <br />carrera magisterial!
+    </h2>
+    <div class="w-full relative h-[340px] lg:h-[450px]">
+      {
+        testimonies.map((slide, index) => (
+          <div
+            data-index={index}
+            class:list={[
+              'slide transition-all duration-500 rounded-[10px] shadow-dm bg-white p-6 grid grid-rows-[1fr_auto] gap-2 items-center w-[241px] h-[263px] mx-auto top-4 left-0 right-0',
+              'md:w-[400px] md:h-[280px] md:p-[60px]',
+              'lg:w-[636px] lg:h-[340px] lg:p-[60px]',
+              `index-${index}`,
+            ]}
+          >
+            <div class="text-center text-xs lg:text-lg" set:html={slide.body} />
+            <div class="flex flex-col gap-4 items-center lg:flex-row lg:justify-center">
+              <Image
+                src={slide.image}
+                alt="testimony"
+                width="73"
+                height="73"
+                class="rounded-full overflow-hidden w-[40px] h-[40px] lg:w-[73px] lg:h-[73px]"
+              />
+              <div class="flex flex-col lg:items-start">
+                <span class="text-center text-xs font-bold lg:text-xl">
+                  {slide.author}
+                </span>
+                <span class="text-center text-[10px] lg:text-base">
+                  {slide.detail}
+                </span>
+              </div>
+            </div>
+          </div>
+        ))
+      }
+
+      {
+        bgImages.map(bg => (
+          <Image
+            src={bg.image}
+            alt="testimony"
+            class:list={[
+              'bg-testimony absolute rounded-dm transition-all',
+              bg.class,
+            ]}
+            width={bg.size}
+            height={bg.size}
+            style={{
+              '--bounce-to': bg.bounceTo,
+              '--time': bg.time,
+            }}
+          />
+        ))
+      }
+
+      <div
+        class="flex gap-4 justify-center items-center absolute bottom-4 lg:bottom-8 left-0 right-0 w-full"
+      >
+        {
+          testimonies.map((_, index) => (
+            <button
+              type="button"
+              class:list={[
+                'slide-butotn w-[14px] h-[14px] rounded-full  transition-colors',
+                {
+                  'bg-primary hover:bg-primary': index === 0,
+                  'bg-primary/20 hover:bg-primary/50': index !== 0,
+                },
+              ]}
+              data-index={index}
+            />
+          ))
+        }
+      </div>
+    </div>
+  </div>
+</div>
