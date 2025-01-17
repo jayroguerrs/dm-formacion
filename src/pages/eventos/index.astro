@@ -14,11 +14,7 @@ const featuredEventsRequest = directus.request(
     sort: 'start',
     fields: ['id', 'title', 'modality', 'image', 'start', 'end'],
     filter: {
-      _and: [
-        { status: { _eq: 'published' } },
-        { featured: { _eq: true } },
-        { start: { _gte: format(new Date(), 'dd-MM-yy') } },
-      ],
+      _and: [{ status: { _eq: 'published' } }, { featured: { _eq: true } }],
     },
   })
 );
