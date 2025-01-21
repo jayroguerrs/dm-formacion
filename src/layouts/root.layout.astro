@@ -33,6 +33,18 @@ const logoFooter = directusFileURL(siteConfig.logoFooter);
       href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap"
       rel="stylesheet"
     />
+    <!-- Google tag (gtag.js) --> 
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-PDSV61229P">
+    </script> 
+    <script is:inline> 
+      window.dataLayer = window.dataLayer || []; 
+      function gtag(){
+        dataLayer.push(arguments);
+      } 
+      gtag('js', new Date()); 
+      
+      gtag('config', 'G-PDSV61229P'); 
+    </script>
 
     <!-- Google Tag Manager -->
     <script is:inline>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
@@ -42,21 +54,6 @@ const logoFooter = directusFileURL(siteConfig.logoFooter);
       })(window,document,'script','dataLayer','GTM-P6FTDRX5');
     </script>
     <!-- End Google Tag Manager -->
-
-    <!-- Google tag (gtag.js) -->
-    <!--
-      <script async src="https://www.googletagmanager.com/gtag/js?id=G-FTTGEFVLT0"
-      ></script>
-      <script is:inline>
-        window.dataLayer = window.dataLayer || [];
-        function gtag() {
-          dataLayer.push(arguments);
-        }
-        gtag('js', new Date());
-  
-        gtag('config', 'G-FTTGEFVLT0');
-      </script>
-     -->
 
     <ViewTransitions />
   </head>
