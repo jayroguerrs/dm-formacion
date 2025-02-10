@@ -170,7 +170,7 @@ const config = await directus.request(readSingleton('validatorConfig'));
 <script>
   import { isInputError } from 'astro:actions';
   import { actions } from 'astro:actions';
-  import { format } from 'date-fns';
+  import { format, parseISO } from 'date-fns';
 
   const form = document.querySelector('.validator form');
   const successDialog = document.querySelector(
@@ -214,12 +214,12 @@ const config = await directus.request(readSingleton('validatorConfig'));
 
     const certificateStart = document.querySelector('.certificate-start')!;
     certificateStart.innerHTML = data?.courseStart
-      ? format(data.courseStart, 'dd/MM/yyyy')
+      ? format(parseISO(data.courseStart), 'dd/MM/yyyy')
       : '';
 
     const certificateEnd = document.querySelector('.certificate-end')!;
     certificateEnd.innerHTML = data?.courseEnd
-      ? format(data.courseEnd, 'dd/MM/yyyy')
+      ? format(parseISO(data.courseEnd), 'dd/MM/yyyy')
       : '';
 
     successDialog?.showModal();
